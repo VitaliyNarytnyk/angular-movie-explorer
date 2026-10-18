@@ -16,6 +16,34 @@ The application is currently under development.
 - Vitest
 - ESLint and Prettier
 
+## Project structure
+
+Code is grouped by feature. The movie catalog uses the following structure;
+implementation files will be added as development progresses.
+
+```text
+src/app/
+  features/
+    movies/
+      models/
+      services/
+      components/
+        movie-card/
+        movie-search/
+      pages/
+        movie-list/
+        movie-detail/
+  app.routes.ts
+```
+
+Movie models and `MovieService` belong to `features/movies`, alongside the pages
+and components that use them. Pages coordinate data loading and page state;
+the card and search components receive data and communicate through inputs and
+outputs.
+
+A `shared` directory will be introduced only when code is needed by multiple
+features. No additional architectural layers are required for the current scope.
+
 ## Requirements
 
 - Node.js 24.22.0 — the version used for development
