@@ -9,7 +9,12 @@
   "projects": {
     "angular-movie-explorer": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "type": "component",
+          "addTypeToClassName": true
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",

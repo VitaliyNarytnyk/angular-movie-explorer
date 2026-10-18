@@ -1,0 +1,26 @@
+<a
+  [routerLink]="['/movies', movie().id]"
+  class="block h-full rounded-xl bg-slate-900 p-4 transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
+>
+  @if (posterUrl(); as poster) {
+    <img
+      [ngSrc]="poster"
+      width="500"
+      height="750"
+      alt=""
+      class="mb-4 aspect-2/3 w-full rounded-lg object-cover"
+    />
+  } @else {
+    <div
+      class="mb-4 flex aspect-2/3 items-center justify-center rounded-lg bg-slate-800 text-sm text-slate-300"
+    >
+      No poster available
+    </div>
+  }
+
+  <h3 class="text-lg font-semibold">{{ movie().title }}</h3>
+
+  <p class="mt-2 line-clamp-3 text-sm text-slate-300">
+    {{ movie().overview || 'No description available.' }}
+  </p>
+</a>

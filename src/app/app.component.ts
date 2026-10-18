@@ -4,9 +4,9 @@ import { RouterOutlet } from '@angular/router';
 @Component({
   imports: [RouterOutlet],
   selector: 'app-root',
-  styleUrl: './app.css',
-  templateUrl: './app.html',
+  styleUrl: './app.component.css',
+  templateUrl: './app.component.html',
 })
-export class App {
+export class AppComponent {
   protected readonly title = signal('angular-movie-explorer');
 }

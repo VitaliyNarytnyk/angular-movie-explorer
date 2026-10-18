@@ -9,12 +9,16 @@ export const routes: Routes = [
   {
     path: 'movies',
     loadComponent: () =>
-      import('./features/movies/pages/movie-list/movie-list').then((m) => m.MovieList),
+      import('./features/movies/pages/movie-list/movie-list.component').then(
+        (m) => m.MovieListComponent,
+      ),
   },
   {
     path: 'movies/:id',
     loadComponent: () =>
-      import('./features/movies/pages/movie-detail/movie-detail').then((m) => m.MovieDetail),
+      import('./features/movies/pages/movie-detail/movie-detail.component').then(
+        (m) => m.MovieDetailComponent,
+      ),
   },
   {
     path: '**',
