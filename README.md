@@ -1,59 +1,116 @@
-# AngularMovieExplorer
+# Angular Movie Explorer
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.3.
+An Angular application for browsing popular movies, searching the TMDb catalog,
+and viewing movie details.
 
-## Development server
+The application is currently under development.
 
-To start a local development server, run:
+## Tech stack
 
-```bash
-ng serve
-```
+- Angular 22
+- TypeScript
+- Angular Signals
+- Angular Router
+- RxJS
+- Tailwind CSS
+- Vitest
+- ESLint and Prettier
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Requirements
 
-## Code scaffolding
+- Node.js 24.22.0 — the version used for development
+- npm 11.19.1 — the version used for development
+- A TMDb account and API Read Access Token
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Getting started
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+### 1. Clone the repository
 
 ```bash
-ng build
+git clone https://github.com/VitaliyNarytnyk/angular-movie-explorer.git
+cd angular-movie-explorer
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+### 2. Install dependencies
 
 ```bash
-ng test
+npm ci
 ```
 
-## Running end-to-end tests
+### 3. Configure TMDb access
 
-For end-to-end (e2e) testing, run:
+Obtain an **API Read Access Token** from your
+[TMDb account API settings](https://www.themoviedb.org/settings/api).
+
+Copy the configuration template:
 
 ```bash
-ng e2e
+cp src/environments/environment.example.ts src/environments/environment.local.ts
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Open `src/environments/environment.local.ts` and replace
+`YOUR_TMDB_READ_ACCESS_TOKEN` with your token. Do not include the `Bearer` prefix.
 
-## Additional Resources
+The local configuration file is excluded from Git. Each developer must create
+their own local copy.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+The token is used by the browser application and is visible in network requests.
+Excluding the file from Git prevents publishing it in the repository; it does
+not hide the token from application users.
+
+### 4. Start the development server
+
+```bash
+npm start
+```
+
+Open [http://localhost:4200](http://localhost:4200).
+
+The application automatically reloads when source files change.
+
+## Available commands
+
+Run these commands from the project root.
+
+| Command                     | Description                                     |
+| --------------------------- | ----------------------------------------------- |
+| `npm start`                 | Start the development server                    |
+| `npm run build`             | Create a production build                       |
+| `npm run watch`             | Build in development mode and watch for changes |
+| `npm test`                  | Run unit tests in watch mode                    |
+| `npm test -- --watch=false` | Run unit tests once                             |
+| `npm run lint`              | Check TypeScript and Angular templates          |
+| `npm run lint:fix`          | Apply automatic ESLint fixes                    |
+| `npm run format`            | Format project files with Prettier              |
+| `npm run format:check`      | Check formatting without modifying files        |
+
+Build artifacts are written to `dist/angular-movie-explorer/`.
+
+## Code generation
+
+Generate a component using the local Angular CLI:
+
+```bash
+npx ng generate component component-name
+```
+
+List available generators:
+
+```bash
+npx ng generate --help
+```
+
+## Checks before committing
+
+```bash
+npm run format:check
+npm run lint
+npm test -- --watch=false
+npm run build
+```
+
+## Resources
+
+- [Angular documentation](https://angular.dev/)
+- [Tailwind CSS documentation](https://tailwindcss.com/docs)
+- [TMDb API documentation](https://developer.themoviedb.org/docs)
