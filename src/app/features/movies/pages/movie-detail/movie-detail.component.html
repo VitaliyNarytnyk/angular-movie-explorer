@@ -1,1 +1,97 @@
-<p>movie-detail works!</p>
+<section class="mt-8">
+  <a
+    routerLink="/movies"
+    class="mb-6 inline-flex rounded-sm text-teal-400 underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
+  >
+    Back to movies
+  </a>
+
+  <h2
+    #pageHeading
+    tabindex="-1"
+    class="mb-6 text-2xl font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
+  >
+    Movie details
+  </h2>
+
+  @if (invalidId()) {
+    <p role="alert">Invalid movie ID.</p>
+  } @else if (movieService.detailsLoading()) {
+    <p role="status">Loading movie details...</p>
+  } @else if (movieService.detailsError(); as error) {
+    <p role="alert">{{ error }}</p>
+  } @else if (movieService.movieDetails(); as movie) {
+    <article
+      aria-labelledby="movie-title"
+      class="grid gap-8 md:grid-cols-[minmax(0,18rem)_1fr]"
+    >
+      <div>
+        @if (posterUrl(); as poster) {
+          <img
+            [ngSrc]="poster"
+            [alt]="movie.title + ' poster'"
+            width="500"
+            height="750"
+            priority
+            class="aspect-2/3 w-full max-w-sm rounded-xl object-cover"
+          />
+        } @else {
+          <div
+            class="flex aspect-2/3 w-full max-w-sm items-center justify-center rounded-xl bg-slate-800 text-slate-300"
+          >
+            No poster available
+          </div>
+        }
+      </div>
+
+      <div>
+        <h3 id="movie-title" class="text-3xl font-bold">
+          {{ movie.title }}
+        </h3>
+
+        <p class="mt-4 leading-7 text-slate-300">
+          {{ movie.overview || 'No description available.' }}
+        </p>
+
+        <dl class="mt-6 grid gap-6 sm:grid-cols-2">
+          <div>
+            <dt class="text-sm text-slate-400">Rating</dt>
+            <dd class="mt-1">
+              {{ movie.vote_average | number: '1.1-1' }} / 10
+            </dd>
+          </div>
+
+          <div>
+            <dt class="text-sm text-slate-400">Release date</dt>
+            <dd class="mt-1">
+              @if (movie.release_date) {
+                <time [attr.datetime]="movie.release_date">
+                  {{ movie.release_date | date: 'longDate' }}
+                </time>
+              } @else {
+                Release date unavailable
+              }
+            </dd>
+          </div>
+
+          <div class="sm:col-span-2">
+            <dt class="text-sm text-slate-400">Genres</dt>
+            <dd class="mt-2">
+              <ul class="flex flex-wrap gap-2">
+                @for (genre of movie.genres; track genre.id) {
+                  <li class="rounded-full bg-slate-800 px-3 py-1 text-sm">
+                    {{ genre.name }}
+                  </li>
+                } @empty {
+                  <li>No genres available.</li>
+                }
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </article>
+  } @else {
+    <p>No movie details available.</p>
+  }
+</section>
