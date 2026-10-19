@@ -12,19 +12,29 @@ import {
   switchMap,
 } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MovieDetails } from '../models/movie-details.model';
 
 @Service()
 export class MovieService {
   private readonly http = inject(HttpClient);
   private readonly movieQueries = new Subject<string>();
+  private readonly moviesIds = new Subject<number>();
 
   private readonly movieState = signal<Movie[]>([]);
   private readonly loadingState = signal(false);
   private readonly errorState = signal<string | null>(null);
 
+  private readonly detailsState = signal<MovieDetails | null>(null);
+  private readonly detailsLoadingState = signal(false);
+  private readonly detailsErrorState = signal<string | null>(null);
+
   readonly movies = this.movieState.asReadonly();
   readonly loading = this.loadingState.asReadonly();
   readonly error = this.errorState.asReadonly();
+
+  readonly movieDetails = this.detailsState.asReadonly();
+  readonly detailsLoading = this.detailsLoadingState.asReadonly();
+  readonly detailsError = this.detailsErrorState.asReadonly();
 
   constructor() {
     this.movieQueries
@@ -35,6 +45,15 @@ export class MovieService {
       .subscribe((response) => {
         this.movieState.set(response.results);
       });
+
+    this.moviesIds
+      .pipe(
+        switchMap((id) => this.loadMovieDetails(id)),
+        takeUntilDestroyed(),
+      )
+      .subscribe((movie) => {
+        this.detailsState.set(movie);
+      });
   }
 
   getPopularMovies(): void {
@@ -43,6 +62,10 @@ export class MovieService {
 
   searchMovies(keyword: string): void {
     this.movieQueries.next(keyword.trim());
+  }
+
+  getMovieDetails(id: number): void {
+    this.moviesIds.next(id);
   }
 
   private loadMovies(query: string): Observable<MovieListResponse> {
@@ -68,6 +91,31 @@ export class MovieService {
         }),
         finalize(() => {
           this.loadingState.set(false);
+        }),
+      );
+  }
+
+  private loadMovieDetails(id: number): Observable<MovieDetails> {
+    this.detailsState.set(null);
+    this.detailsLoadingState.set(true);
+    this.detailsErrorState.set(null);
+
+    return this.http
+      .get<MovieDetails>(`${environment.tmdbApiUrl}/movie/${id}`, {
+        headers: {
+          Authorization: `Bearer ${environment.tmdbReadAccessToken}`,
+        },
+      })
+      .pipe(
+        catchError(() => {
+          this.detailsErrorState.set(
+            'Unable to load movie details. Please try again.',
+          );
+
+          return EMPTY;
+        }),
+        finalize(() => {
+          this.detailsLoadingState.set(false);
         }),
       );
   }

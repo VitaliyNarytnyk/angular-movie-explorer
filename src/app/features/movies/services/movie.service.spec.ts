@@ -6,6 +6,7 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { MovieListResponse } from '../models/movie-list-response.model';
 import { MovieService } from './movie.service';
+import { MovieDetails } from '../models/movie-details.model';
 
 describe('MovieService', () => {
   let service: MovieService;
@@ -25,6 +26,14 @@ describe('MovieService', () => {
     ],
     total_pages: 1,
     total_results: 1,
+  };
+
+  const detailsResponse: MovieDetails = {
+    ...response.results[0],
+    genres: [
+      { id: 18, name: 'Drama' },
+      { id: 14, name: 'Fantasy' },
+    ],
   };
 
   beforeEach(() => {
@@ -135,5 +144,94 @@ describe('MovieService', () => {
     expect(service.movies()).toEqual(response.results);
     expect(service.loading()).toBe(false);
     expect(service.error()).toBeNull();
+  });
+
+  it('loads movie details without changing the movie list', () => {
+    service.getPopularMovies();
+
+    const listRequest = httpTesting.expectOne((request) =>
+      request.url.endsWith('/movie/popular'),
+    );
+
+    listRequest.flush(response);
+
+    service.getMovieDetails(497);
+
+    expect(service.movieDetails()).toBeNull();
+    expect(service.detailsLoading()).toBe(true);
+    expect(service.detailsError()).toBeNull();
+
+    expect(service.movies()).toEqual(response.results);
+    expect(service.loading()).toBe(false);
+
+    const detailsRequest = httpTesting.expectOne((request) =>
+      request.url.endsWith('/movie/497'),
+    );
+
+    expect(detailsRequest.request.method).toBe('GET');
+
+    detailsRequest.flush(detailsResponse);
+
+    expect(service.movieDetails()).toEqual(detailsResponse);
+    expect(service.detailsLoading()).toBe(false);
+    expect(service.detailsError()).toBeNull();
+    expect(service.movies()).toEqual(response.results);
+  });
+
+  it('shows a details error and allows another request to succeed', () => {
+    service.getMovieDetails(497);
+
+    const failedRequest = httpTesting.expectOne((request) =>
+      request.url.endsWith('/movie/497'),
+    );
+
+    failedRequest.flush(null, {
+      status: 500,
+      statusText: 'Internal Server Error',
+    });
+
+    expect(service.movieDetails()).toBeNull();
+    expect(service.detailsLoading()).toBe(false);
+    expect(service.detailsError()).toBe(
+      'Unable to load movie details. Please try again.',
+    );
+
+    service.getMovieDetails(497);
+
+    expect(service.detailsLoading()).toBe(true);
+    expect(service.detailsError()).toBeNull();
+
+    const retryRequest = httpTesting.expectOne((request) =>
+      request.url.endsWith('/movie/497'),
+    );
+
+    retryRequest.flush(detailsResponse);
+
+    expect(service.movieDetails()).toEqual(detailsResponse);
+    expect(service.detailsLoading()).toBe(false);
+    expect(service.detailsError()).toBeNull();
+  });
+
+  it('cancels the previous details request and loads the latest movie', () => {
+    service.getMovieDetails(37165);
+
+    const firstRequest = httpTesting.expectOne((request) =>
+      request.url.endsWith('/movie/37165'),
+    );
+
+    service.getMovieDetails(497);
+
+    expect(firstRequest.cancelled).toBe(true);
+    expect(service.detailsLoading()).toBe(true);
+
+    const latestRequest = httpTesting.expectOne((request) =>
+      request.url.endsWith('/movie/497'),
+    );
+
+    latestRequest.flush(detailsResponse);
+
+    expect(service.movieDetails()).toEqual(detailsResponse);
+    expect(service.detailsLoading()).toBe(false);
+    expect(service.detailsError()).toBeNull();
   });
 });
