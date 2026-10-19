@@ -1,9 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { MovieService } from '../../services/movie.service';
 import { MovieCardComponent } from '../../components/movie-card/movie-card.component';
+import { MovieSearchComponent } from '../../components/movie-search/movie-search.component';
 
 @Component({
-  imports: [MovieCardComponent],
+  imports: [MovieCardComponent, MovieSearchComponent],
   selector: 'app-movie-list',
   styleUrl: './movie-list.component.css',
   templateUrl: './movie-list.component.html',

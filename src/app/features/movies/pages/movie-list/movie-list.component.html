@@ -1,5 +1,7 @@
 <section class="mt-8" [attr.aria-busy]="movieService.loading()">
-  <h2 class="mb-4 text-2xl font-semibold">Popular movies</h2>
+  <h2 class="mb-4 text-2xl font-semibold">Movies</h2>
+
+  <app-movie-search (searchRequested)="movieService.searchMovies($event)" />
 
   @if (movieService.loading()) {
     <p role="status">Loading movies...</p>

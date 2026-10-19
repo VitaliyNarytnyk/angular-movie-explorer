@@ -2,6 +2,8 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
+import { By } from '@angular/platform-browser';
+import { MovieSearchComponent } from '../../components/movie-search/movie-search.component';
 import { Movie } from '../../models/movie.model';
 import { MovieService } from '../../services/movie.service';
 import { MovieListComponent } from './movie-list.component';
@@ -14,6 +16,7 @@ describe('MovieListComponent', () => {
   const loading = signal(false);
   const error = signal<string | null>(null);
   const getPopularMovies = vi.fn();
+  const searchMovies = vi.fn();
 
   const movie: Movie = {
     id: 497,
@@ -41,6 +44,7 @@ describe('MovieListComponent', () => {
             loading: loading.asReadonly(),
             error: error.asReadonly(),
             getPopularMovies,
+            searchMovies,
           },
         },
       ],
@@ -101,4 +105,18 @@ describe('MovieListComponent', () => {
     expect(cards[0].textContent).toContain('The Green Mile');
     expect(cards[1].textContent).toContain('The Truman Show');
   });
+
+  it.each(['The Green Mile', ''])(
+    'forwards the search keyword %j to the service',
+    (keyword) => {
+      const searchComponent = fixture.debugElement.query(
+        By.directive(MovieSearchComponent),
+      ).componentInstance as MovieSearchComponent;
+
+      searchComponent.searchRequested.emit(keyword);
+
+      expect(searchMovies).toHaveBeenCalledTimes(1);
+      expect(searchMovies).toHaveBeenCalledWith(keyword);
+    },
+  );
 });
