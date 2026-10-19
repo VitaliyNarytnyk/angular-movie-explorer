@@ -5,6 +5,7 @@
   @if (posterUrl(); as poster) {
     <img
       [ngSrc]="poster"
+      [priority]="priority()"
       width="500"
       height="750"
       alt=""

@@ -11,7 +11,7 @@
     <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
       @for (movie of movieService.movies(); track movie.id) {
         <li>
-          <app-movie-card [movie]="movie" />
+          <app-movie-card [movie]="movie" [priority]="$index < 4" />
         </li>
       } @empty {
         <li>No movies found.</li>

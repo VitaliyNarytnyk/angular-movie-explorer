@@ -11,6 +11,7 @@ import { Movie } from '../../models/movie.model';
 })
 export class MovieCardComponent {
   readonly movie = input.required<Movie>();
+  readonly priority = input(false);
 
   protected readonly posterUrl = computed(() => {
     const path = this.movie().poster_path;
