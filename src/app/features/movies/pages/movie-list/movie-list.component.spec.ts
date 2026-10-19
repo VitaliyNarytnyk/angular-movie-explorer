@@ -106,6 +106,12 @@ describe('MovieListComponent', () => {
     expect(cards[1].textContent).toContain('The Truman Show');
   });
 
+  it('focuses the page heading when the catalog opens', async () => {
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(element.querySelector('h2'));
+  });
+
   it.each(['The Green Mile', ''])(
     'forwards the search keyword %j to the service',
     (keyword) => {

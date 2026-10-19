@@ -1,5 +1,11 @@
 <section class="mt-8" [attr.aria-busy]="movieService.loading()">
-  <h2 class="mb-4 text-2xl font-semibold">Movies</h2>
+  <h2
+    #pageHeading
+    tabindex="-1"
+    class="mb-4 text-2xl font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
+  >
+    Movies
+  </h2>
 
   <app-movie-search (searchRequested)="movieService.searchMovies($event)" />
 
