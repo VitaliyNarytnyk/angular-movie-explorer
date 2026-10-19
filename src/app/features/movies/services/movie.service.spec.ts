@@ -75,4 +75,65 @@ describe('MovieService', () => {
     expect(service.loading()).toBe(false);
     expect(service.error()).toBe('Unable to load movies. Please try again.');
   });
+
+  it('searches movies using the trimmed keyword', () => {
+    service.searchMovies(' The Green Mile ');
+
+    expect(service.loading()).toBe(true);
+    expect(service.error()).toBeNull();
+
+    const request = httpTesting.expectOne((request) =>
+      request.url.endsWith('/search/movie'),
+    );
+
+    expect(request.request.method).toBe('GET');
+    expect(request.request.params.get('query')).toBe('The Green Mile');
+
+    request.flush(response);
+
+    expect(service.movies()).toEqual(response.results);
+    expect(service.loading()).toBe(false);
+    expect(service.error()).toBeNull();
+  });
+
+  it.each(['', '  '])(
+    'loads popular movies when the keyword is %j',
+    (keyword) => {
+      service.searchMovies(keyword);
+
+      const request = httpTesting.expectOne((request) =>
+        request.url.endsWith('/movie/popular'),
+      );
+
+      expect(request.request.params.has('query')).toBe(false);
+
+      request.flush(response);
+
+      expect(service.movies()).toEqual(response.results);
+      expect(service.loading()).toBe(false);
+    },
+  );
+
+  it('cancels the previous search and keeps the latest one loading', () => {
+    service.searchMovies('Green');
+
+    const firstRequest = httpTesting.expectOne(
+      (request) => request.params.get('query') === 'Green',
+    );
+
+    service.searchMovies('The Green Mile');
+
+    expect(firstRequest.cancelled).toBe(true);
+    expect(service.loading()).toBe(true);
+
+    const latestRequest = httpTesting.expectOne(
+      (request) => request.params.get('query') === 'The Green Mile',
+    );
+
+    latestRequest.flush(response);
+
+    expect(service.movies()).toEqual(response.results);
+    expect(service.loading()).toBe(false);
+    expect(service.error()).toBeNull();
+  });
 });
