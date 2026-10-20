@@ -5,6 +5,23 @@
     <title>AngularMovieExplorer</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      (() => {
+        let theme;
+
+        try {
+          theme = localStorage.getItem('movie-explorer-theme');
+        } catch {
+          // Use the default dark theme when browser storage is unavailable.
+        }
+
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = 'dark';
+        }
+
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
     <link rel="preconnect" type="image/x-icon" href="https://image.tmdb.org" />
   </head>
   <body>

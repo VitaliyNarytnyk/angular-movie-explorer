@@ -9,7 +9,7 @@
   <a
     routerLink="/movies"
     queryParamsHandling="preserve"
-    class="mb-6 inline-flex rounded-sm text-teal-400 underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
+    class="mb-6 inline-flex rounded-sm text-accent underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
   >
     Back to movies
   </a>
@@ -17,7 +17,7 @@
   <h2
     #pageHeading
     tabindex="-1"
-    class="mb-6 w-fit text-2xl font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
+    class="mb-6 w-fit text-2xl font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
   >
     Movie details
   </h2>
@@ -43,7 +43,7 @@
           />
         } @else {
           <div
-            class="flex aspect-2/3 w-full max-w-sm items-center justify-center rounded-xl bg-slate-800 text-slate-300"
+            class="flex aspect-2/3 w-full max-w-sm items-center justify-center rounded-xl bg-surface-raised text-muted"
           >
             No poster available
           </div>
@@ -55,20 +55,20 @@
           {{ movie.title }}
         </h3>
 
-        <p class="mt-4 leading-7 text-slate-300">
+        <p class="mt-4 leading-7 text-muted">
           {{ movie.overview || 'No description available.' }}
         </p>
 
         <dl class="mt-6 grid gap-6 sm:grid-cols-2">
           <div>
-            <dt class="text-sm text-slate-400">Rating</dt>
+            <dt class="text-sm text-muted">Rating</dt>
             <dd class="mt-1">
               {{ movie.vote_average | number: '1.1-1' }} / 10
             </dd>
           </div>
 
           <div>
-            <dt class="text-sm text-slate-400">Release date</dt>
+            <dt class="text-sm text-muted">Release date</dt>
             <dd class="mt-1">
               @if (movie.release_date) {
                 <time [attr.datetime]="movie.release_date">
@@ -81,11 +81,11 @@
           </div>
 
           <div class="sm:col-span-2">
-            <dt class="text-sm text-slate-400">Genres</dt>
+            <dt class="text-sm text-muted">Genres</dt>
             <dd class="mt-2">
               <ul class="flex flex-wrap gap-2">
                 @for (genre of movie.genres; track genre.id) {
-                  <li class="rounded-full bg-slate-800 px-3 py-1 text-sm">
+                  <li class="rounded-full bg-surface-raised px-3 py-1 text-sm">
                     {{ genre.name }}
                   </li>
                 } @empty {

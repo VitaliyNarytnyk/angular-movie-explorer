@@ -2,7 +2,7 @@
 
 @layer components {
   .movie-card {
-    @apply block h-full rounded-xl bg-slate-900 p-4 transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400;
+    @apply block h-full rounded-xl bg-surface p-4 transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent;
   }
 
   .movie-poster {

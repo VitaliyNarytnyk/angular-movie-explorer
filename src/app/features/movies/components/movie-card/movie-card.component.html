@@ -24,7 +24,7 @@
     }
   } @else {
     <div
-      class="mb-4 flex aspect-2/3 items-center justify-center rounded-lg bg-slate-800 text-sm text-slate-300"
+      class="mb-4 flex aspect-2/3 items-center justify-center rounded-lg bg-surface-raised text-sm text-muted"
     >
       No poster available
     </div>
@@ -32,7 +32,7 @@
 
   <h3 class="text-lg font-semibold">{{ movie().title }}</h3>
 
-  <p class="mt-2 line-clamp-3 text-sm text-slate-300">
+  <p class="mt-2 line-clamp-3 text-sm text-muted">
     {{ movie().overview || 'No description available.' }}
   </p>
 </a>

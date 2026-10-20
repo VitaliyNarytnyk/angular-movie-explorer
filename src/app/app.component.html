@@ -3,16 +3,56 @@
 }
 <main
   [inert]="router.currentNavigation() !== null"
-  class="min-h-screen bg-slate-950 px-6 py-16 text-slate-100"
+  class="min-h-screen bg-page px-6 py-16 text-content"
 >
   <div class="mx-auto max-w-6xl">
-    <h1 class="text-4xl font-bold tracking-tight text-teal-400">
-      Movie Explorer
-    </h1>
+    <header
+      class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-4"
+    >
+      <h1 class="text-3xl font-bold tracking-tight text-accent sm:text-4xl">
+        Movie Explorer
+      </h1>
 
-    <p class="mt-4 text-lg text-slate-400">
-      Discover popular movies and find your next favorite.
-    </p>
+      <button
+        type="button"
+        class="theme-toggle"
+        [attr.aria-label]="
+          themeService.theme() === 'dark'
+            ? 'Switch to light theme'
+            : 'Switch to dark theme'
+        "
+        (click)="themeService.toggleTheme()"
+      >
+        <svg
+          class="size-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+        >
+          @if (themeService.theme() === 'dark') {
+            <circle cx="12" cy="12" r="4" />
+            <path
+              d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"
+            />
+          } @else {
+            <path d="M20.9 13a9 9 0 0 1-9.9-9.9A9 9 0 1 0 20.9 13Z" />
+          }
+        </svg>
+
+        <span class="hidden sm:inline">
+          {{ themeService.theme() === 'dark' ? 'Light theme' : 'Dark theme' }}
+        </span>
+      </button>
+
+      <p class="col-span-2 text-lg text-muted">
+        Discover popular movies and find your next favorite.
+      </p>
+    </header>
 
     <router-outlet />
   </div>

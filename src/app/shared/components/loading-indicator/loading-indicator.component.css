@@ -2,10 +2,10 @@
 
 @layer components {
   .loading-overlay {
-    @apply fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100;
+    @apply fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-page text-content;
   }
 
   .loading-spinner {
-    @apply size-10 rounded-full border-4 border-slate-600 border-t-teal-400 motion-safe:animate-spin;
+    @apply size-10 rounded-full border-4 border-outline border-t-accent motion-safe:animate-spin;
   }
 }

@@ -2,10 +2,10 @@
 
 @layer components {
   .search-input {
-    @apply min-h-11 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-100 focus-visible:outline-2 focus-visible:outline-teal-400;
+    @apply min-h-11 rounded-lg border border-outline bg-surface px-3 py-2 text-content placeholder:text-muted focus-visible:outline-2 focus-visible:outline-accent;
   }
 
   .search-button {
-    @apply min-h-11 rounded-lg bg-teal-400 px-4 py-2 font-semibold text-slate-950 hover:bg-teal-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400;
+    @apply min-h-11 rounded-lg bg-accent px-4 py-2 font-semibold text-on-accent hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
   }
 }
