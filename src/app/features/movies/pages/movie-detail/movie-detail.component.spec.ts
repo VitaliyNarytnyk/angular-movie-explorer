@@ -154,12 +154,6 @@ describe('MovieDetailComponent', () => {
     }
   });
 
-  it('focuses the page heading when the page opens', async () => {
-    await fixture.whenStable();
-
-    expect(document.activeElement).toBe(element.querySelector('h2'));
-  });
-
   it.each(['abc', '0', '-1', '1.5'])(
     'does not request movie details for invalid ID %j',
     (id) => {

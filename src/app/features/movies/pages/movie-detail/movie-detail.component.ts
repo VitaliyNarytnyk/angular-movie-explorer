@@ -7,7 +7,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MovieService } from '../../services/movie.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, map } from 'rxjs';
@@ -21,6 +21,7 @@ import { DatePipe, DecimalPipe, NgOptimizedImage } from '@angular/common';
 })
 export class MovieDetailComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly pageHeading =
     viewChild<ElementRef<HTMLHeadingElement>>('pageHeading');
 
@@ -34,11 +35,13 @@ export class MovieDetailComponent {
   });
 
   constructor() {
-    afterNextRender({
-      write: () => {
-        this.pageHeading()?.nativeElement.focus();
-      },
-    });
+    if (this.router.lastSuccessfulNavigation() !== null) {
+      afterNextRender({
+        write: () => {
+          this.pageHeading()?.nativeElement.focus();
+        },
+      });
+    }
 
     this.route.paramMap
       .pipe(
