@@ -1,4 +1,10 @@
-<main class="min-h-screen bg-slate-950 px-6 py-16 text-slate-100">
+@if (router.currentNavigation()) {
+  <app-loading-indicator message="Loading page..." />
+}
+<main
+  [inert]="router.currentNavigation() !== null"
+  class="min-h-screen bg-slate-950 px-6 py-16 text-slate-100"
+>
   <div class="mx-auto max-w-6xl">
     <h1 class="text-4xl font-bold tracking-tight text-teal-400">
       Movie Explorer

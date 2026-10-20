@@ -1,4 +1,11 @@
-<section class="mt-8">
+@if (!invalidId() && movieService.detailsLoading()) {
+  <app-loading-indicator message="Loading movie details..." />
+}
+<section
+  class="mt-8"
+  [attr.aria-busy]="!invalidId() && movieService.detailsLoading()"
+  [inert]="!invalidId() && movieService.detailsLoading()"
+>
   <a
     routerLink="/movies"
     queryParamsHandling="preserve"
@@ -17,8 +24,6 @@
 
   @if (invalidId()) {
     <p role="alert">Invalid movie ID.</p>
-  } @else if (movieService.detailsLoading()) {
-    <p role="status">Loading movie details...</p>
   } @else if (movieService.detailsError(); as error) {
     <p role="alert">{{ error }}</p>
   } @else if (movieService.movieDetails(); as movie) {

@@ -1,7 +1,7 @@
 <a
   [routerLink]="['/movies', movie().id]"
   queryParamsHandling="preserve"
-  class="block h-full rounded-xl bg-slate-900 p-4 transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
+  class="movie-card"
 >
   @if (posterUrl(); as poster) {
     @if (priority()) {
@@ -11,7 +11,7 @@
         width="500"
         height="750"
         alt=""
-        class="mb-4 aspect-2/3 w-full rounded-lg object-cover"
+        class="movie-poster"
       />
     } @else {
       <img
@@ -19,7 +19,7 @@
         width="500"
         height="750"
         alt=""
-        class="mb-4 aspect-2/3 w-full rounded-lg object-cover"
+        class="movie-poster"
       />
     }
   } @else {

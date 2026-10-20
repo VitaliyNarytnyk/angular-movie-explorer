@@ -13,9 +13,14 @@ import { MovieSearchComponent } from '../../components/movie-search/movie-search
 import { MovieService } from '../../services/movie.service';
 import { distinctUntilChanged, map } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LoadingIndicatorComponent } from '../../../../shared/components/loading-indicator/loading-indicator.component';
 
 @Component({
-  imports: [MovieCardComponent, MovieSearchComponent],
+  imports: [
+    MovieCardComponent,
+    MovieSearchComponent,
+    LoadingIndicatorComponent,
+  ],
   selector: 'app-movie-list',
   styleUrl: './movie-list.component.css',
   templateUrl: './movie-list.component.html',

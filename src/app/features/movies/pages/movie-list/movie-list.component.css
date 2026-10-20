@@ -1,0 +1,11 @@
+@reference '../../../../../styles.css';
+
+@layer components {
+  .pagination-button {
+    @apply min-h-11 min-w-11 rounded-lg bg-slate-800 py-2 text-slate-100 transition duration-150 enabled:cursor-pointer enabled:hover:brightness-110 motion-safe:enabled:active:scale-95 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .pagination-button[aria-current='page'] {
+    @apply bg-teal-400 text-slate-950;
+  }
+}

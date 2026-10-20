@@ -1,4 +1,11 @@
-<section class="mt-8" [attr.aria-busy]="movieService.loading()">
+@if (movieService.loading()) {
+  <app-loading-indicator message="Loading movies..." />
+}
+<section
+  class="mt-8"
+  [attr.aria-busy]="movieService.loading()"
+  [inert]="movieService.loading()"
+>
   <header
     class="sticky top-0 z-10 mb-6 flex flex-col gap-3 border-b border-slate-800 bg-slate-950 py-4 sm:flex-row sm:items-center sm:gap-6"
   >
@@ -17,9 +24,7 @@
     />
   </header>
 
-  @if (movieService.loading()) {
-    <p role="status">Loading movies...</p>
-  } @else if (movieService.error(); as error) {
+  @if (movieService.error(); as error) {
     <p role="alert">{{ error }}</p>
   } @else {
     <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -43,7 +48,7 @@
         aria-label="Previous page"
         [disabled]="movieService.loading() || movieService.currentPage() <= 1"
         (click)="goToPage(movieService.currentPage() - 1)"
-        class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-slate-800 px-3 py-2 transition duration-150 enabled:cursor-pointer enabled:hover:brightness-110 motion-safe:enabled:active:scale-95 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400 disabled:cursor-not-allowed disabled:opacity-50"
+        class="pagination-button inline-flex items-center justify-center px-3"
       >
         <svg
           class="size-5"
@@ -69,13 +74,8 @@
           "
           [disabled]="movieService.loading()"
           [class.hidden]="!mobilePages().includes(page)"
-          [class]="
-            page === movieService.currentPage()
-              ? 'bg-teal-400 text-slate-950'
-              : 'bg-slate-800 text-slate-100'
-          "
           (click)="goToPage(page)"
-          class="min-h-11 min-w-11 rounded-lg px-2 py-2 font-medium tabular-nums transition duration-150 sm:inline-block enabled:cursor-pointer enabled:hover:brightness-110 motion-safe:enabled:active:scale-95 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400 disabled:cursor-not-allowed disabled:opacity-50"
+          class="pagination-button px-2 font-medium tabular-nums sm:inline-block"
         >
           {{ page }}
         </button>
@@ -89,7 +89,7 @@
           movieService.currentPage() >= movieService.totalPages()
         "
         (click)="goToPage(movieService.currentPage() + 1)"
-        class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-slate-800 px-3 py-2 transition duration-150 enabled:cursor-pointer enabled:hover:brightness-110 motion-safe:enabled:active:scale-95 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400 disabled:cursor-not-allowed disabled:opacity-50"
+        class="pagination-button inline-flex items-center justify-center px-3"
       >
         <svg
           class="size-5"

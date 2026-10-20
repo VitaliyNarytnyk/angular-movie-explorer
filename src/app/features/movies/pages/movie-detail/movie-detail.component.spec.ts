@@ -83,7 +83,7 @@ describe('MovieDetailComponent', () => {
     expect(getMovieDetails).toHaveBeenLastCalledWith(37165);
   });
 
-  it('displays loading instead of previously loaded details', () => {
+  it('keeps previous details inert while loading', () => {
     movieDetails.set(movie);
     detailsLoading.set(true);
     fixture.detectChanges();
@@ -91,7 +91,8 @@ describe('MovieDetailComponent', () => {
     expect(element.querySelector('[role="status"]')?.textContent).toContain(
       'Loading movie details',
     );
-    expect(element.querySelector('article')).toBeNull();
+    expect(element.querySelector('article')).not.toBeNull();
+    expect(element.querySelector('section')?.inert).toBe(true);
   });
 
   it('displays the service error', () => {

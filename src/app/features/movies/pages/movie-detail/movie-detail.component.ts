@@ -12,9 +12,16 @@ import { MovieService } from '../../services/movie.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, map } from 'rxjs';
 import { DatePipe, DecimalPipe, NgOptimizedImage } from '@angular/common';
+import { LoadingIndicatorComponent } from '../../../../shared/components/loading-indicator/loading-indicator.component';
 
 @Component({
-  imports: [RouterLink, NgOptimizedImage, DatePipe, DecimalPipe],
+  imports: [
+    RouterLink,
+    NgOptimizedImage,
+    DatePipe,
+    DecimalPipe,
+    LoadingIndicatorComponent,
+  ],
   selector: 'app-movie-detail',
   styleUrl: './movie-detail.component.css',
   templateUrl: './movie-detail.component.html',

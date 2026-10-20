@@ -113,7 +113,6 @@ export class MovieService {
   }
 
   private loadMovieDetails(id: number): Observable<MovieDetails> {
-    this.detailsState.set(null);
     this.detailsLoadingState.set(true);
     this.detailsErrorState.set(null);
 
