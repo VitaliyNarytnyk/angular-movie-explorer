@@ -234,4 +234,74 @@ describe('MovieService', () => {
     expect(service.detailsLoading()).toBe(false);
     expect(service.detailsError()).toBeNull();
   });
+
+  it('loads the requested search page', () => {
+    service.searchMovies('The Green Mile');
+
+    const firstRequest = httpTesting.expectOne((request) =>
+      request.url.endsWith('/search/movie'),
+    );
+
+    firstRequest.flush({
+      ...response,
+      total_pages: 3,
+    });
+
+    service.searchMovies('The Green Mile', 2);
+
+    const secondRequest = httpTesting.expectOne((request) =>
+      request.url.endsWith('/search/movie'),
+    );
+
+    expect(secondRequest.request.params.get('query')).toBe('The Green Mile');
+    expect(secondRequest.request.params.get('page')).toBe('2');
+
+    secondRequest.flush({
+      ...response,
+      page: 2,
+      total_pages: 3,
+    });
+
+    expect(service.currentPage()).toBe(2);
+  });
+
+  it('defaults to the first search page when page is omitted', () => {
+    service.searchMovies('Green');
+
+    const firstRequest = httpTesting.expectOne((request) =>
+      request.url.endsWith('/search/movie'),
+    );
+
+    firstRequest.flush({
+      ...response,
+      total_pages: 3,
+    });
+
+    service.searchMovies('Green', 2);
+
+    const secondRequest = httpTesting.expectOne(
+      (request) => request.params.get('page') === '2',
+    );
+
+    secondRequest.flush({
+      ...response,
+      page: 2,
+      total_pages: 3,
+    });
+
+    expect(service.currentPage()).toBe(2);
+
+    service.searchMovies('The Green Mile');
+
+    const newSearchRequest = httpTesting.expectOne((request) =>
+      request.url.endsWith('/search/movie'),
+    );
+
+    expect(newSearchRequest.request.params.get('query')).toBe('The Green Mile');
+    expect(newSearchRequest.request.params.get('page')).toBe('1');
+
+    newSearchRequest.flush(response);
+
+    expect(service.currentPage()).toBe(1);
+  });
 });

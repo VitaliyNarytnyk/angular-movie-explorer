@@ -1,26 +1,19 @@
-<form
-  role="search"
-  aria-label="Movie search"
-  class="mb-6"
-  (submit)="onSubmit($event)"
->
-  <label for="movie-search" class="mb-2 block text-sm font-medium">
-    Search movies
-  </label>
+<form role="search" aria-label="Movie search" (submit)="onSubmit($event)">
+  <label for="movie-search" class="sr-only"> Search movies </label>
 
-  <div class="flex flex-col gap-3 sm:flex-row">
+  <div class="flex gap-3">
     <input
       id="movie-search"
       type="search"
       [formField]="searchForm.keyword"
       (input)="onInput($event)"
       placeholder="e.g. The Green Mile"
-      class="min-w-0 flex-1 rounded-lg border border-slate-600 bg-slate-900 px-4 py-3 text-slate-100 focus-visible:outline-2 focus-visible:outline-teal-400"
+      class="min-h-11 min-w-0 flex-1 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-slate-100 focus-visible:outline-2 focus-visible:outline-teal-400"
     />
 
     <button
       type="submit"
-      class="rounded-lg bg-teal-400 px-6 py-3 font-semibold text-slate-950 hover:bg-teal-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400"
+      class="min-h-11 shrink-0 rounded-lg bg-teal-400 px-4 py-2 font-semibold text-slate-950 hover:bg-teal-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400"
     >
       Search
     </button>

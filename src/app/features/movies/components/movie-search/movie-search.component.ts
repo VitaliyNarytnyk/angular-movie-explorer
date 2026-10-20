@@ -1,4 +1,4 @@
-import { Component, output, signal } from '@angular/core';
+import { Component, output, input, linkedSignal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { form, FormField } from '@angular/forms/signals';
 import { debounce, distinctUntilChanged, of, Subject, timer } from 'rxjs';
@@ -14,9 +14,12 @@ interface SearchRequest {
   templateUrl: './movie-search.component.html',
 })
 export class MovieSearchComponent {
+  readonly query = input('');
   readonly searchRequested = output<string>();
 
-  private readonly searchModel = signal({ keyword: '' });
+  private readonly searchModel = linkedSignal(() => ({
+    keyword: this.query(),
+  }));
   private readonly searchRequests = new Subject<SearchRequest>();
 
   protected readonly searchForm = form(this.searchModel);

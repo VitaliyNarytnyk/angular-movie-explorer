@@ -17,12 +17,17 @@ import { MovieDetails } from '../models/movie-details.model';
 @Service()
 export class MovieService {
   private readonly http = inject(HttpClient);
-  private readonly movieQueries = new Subject<string>();
+  private readonly movieQueries = new Subject<{
+    query: string;
+    page: number;
+  }>();
   private readonly moviesIds = new Subject<number>();
 
   private readonly movieState = signal<Movie[]>([]);
   private readonly loadingState = signal(false);
   private readonly errorState = signal<string | null>(null);
+  private readonly currentPageState = signal(1);
+  private readonly totalPageState = signal(0);
 
   private readonly detailsState = signal<MovieDetails | null>(null);
   private readonly detailsLoadingState = signal(false);
@@ -31,6 +36,8 @@ export class MovieService {
   readonly movies = this.movieState.asReadonly();
   readonly loading = this.loadingState.asReadonly();
   readonly error = this.errorState.asReadonly();
+  readonly currentPage = this.currentPageState.asReadonly();
+  readonly totalPages = this.totalPageState.asReadonly();
 
   readonly movieDetails = this.detailsState.asReadonly();
   readonly detailsLoading = this.detailsLoadingState.asReadonly();
@@ -39,11 +46,13 @@ export class MovieService {
   constructor() {
     this.movieQueries
       .pipe(
-        switchMap((query) => this.loadMovies(query)),
+        switchMap(({ query, page }) => this.loadMovies(query, page)),
         takeUntilDestroyed(),
       )
       .subscribe((response) => {
         this.movieState.set(response.results);
+        this.currentPageState.set(response.page);
+        this.totalPageState.set(Math.min(response.total_pages, 500));
       });
 
     this.moviesIds
@@ -56,24 +65,32 @@ export class MovieService {
       });
   }
 
-  getPopularMovies(): void {
-    this.movieQueries.next('');
+  getPopularMovies(page = 1): void {
+    this.movieQueries.next({
+      query: '',
+      page,
+    });
   }
 
-  searchMovies(keyword: string): void {
-    this.movieQueries.next(keyword.trim());
+  searchMovies(keyword: string, page = 1): void {
+    this.movieQueries.next({
+      query: keyword.trim(),
+      page,
+    });
   }
 
   getMovieDetails(id: number): void {
     this.moviesIds.next(id);
   }
 
-  private loadMovies(query: string): Observable<MovieListResponse> {
+  private loadMovies(query: string, page = 1): Observable<MovieListResponse> {
     this.loadingState.set(true);
     this.errorState.set(null);
 
     const endpoint = query ? '/search/movie' : '/movie/popular';
-    const params: Record<string, string> = query ? { query } : {};
+    const params: Record<string, string | number> = query
+      ? { query, page }
+      : { page };
 
     return this.http
       .get<MovieListResponse>(`${environment.tmdbApiUrl}${endpoint}`, {
