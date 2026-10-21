@@ -1,0 +1,274 @@
+<form novalidate class="space-y-3" (submit)="onSubmit($event)">
+  <details class="filter-panel">
+    <summary class="filter-panel-heading">
+      <h3>Sort</h3>
+    </summary>
+    <div class="p-3.5">
+      <div class="space-y-2">
+        <label for="movie-filter-sort" class="block text-sm font-medium">
+          Sort by
+        </label>
+
+        <div class="flex gap-2">
+          <div class="filter-select min-w-0 flex-1">
+            <select
+              id="movie-filter-sort"
+              [formField]="filtersForm.sortField"
+              (change)="onSortFieldChange()"
+              class="filter-control"
+            >
+              @for (option of sortFields; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+          <button
+            type="button"
+            class="filter-secondary inline-flex min-w-11 shrink-0 items-center justify-center px-2"
+            [attr.aria-label]="
+              filtersModel().sortDirection === 'asc'
+                ? 'Switch to descending order'
+                : 'Switch to ascending order'
+            "
+            aria-describedby="movie-sort-order"
+            (click)="toggleSortDirection()"
+          >
+            @if (filtersModel().sortField === 'original_title') {
+              <span class="text-xs font-semibold">{{
+                filtersModel().sortDirection === 'asc' ? 'A–Z' : 'Z–A'
+              }}</span>
+            } @else {
+              <svg
+                class="size-4"
+                [class.rotate-180]="filtersModel().sortDirection === 'asc'"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="M12 4v16m-6-6 6 6 6-6" />
+              </svg>
+            }
+          </button>
+        </div>
+        <p id="movie-sort-order" class="text-sm text-muted" aria-live="polite">
+          {{ sortLabel() }}
+        </p>
+      </div>
+    </div>
+  </details>
+
+  <details #filtersPanel class="filter-panel">
+    <summary class="filter-panel-heading">
+      <h3>Filters</h3>
+    </summary>
+    <div class="filter-sections">
+      <div class="filter-section">
+        <fieldset
+          [disabled]="genresLoading()"
+          aria-describedby="movie-filter-genres-help"
+        >
+          <legend class="mb-2 text-sm font-medium">Genres</legend>
+
+          @if (genresLoading()) {
+            <p role="status" class="text-sm text-muted">Loading genres...</p>
+          } @else if (genresError(); as error) {
+            <p role="alert" class="text-sm">{{ error }}</p>
+
+            <button
+              type="button"
+              class="filter-secondary mt-3"
+              (click)="genresRetryRequested.emit()"
+            >
+              Retry loading genres
+            </button>
+          } @else {
+            <div class="flex flex-wrap gap-1.5">
+              @for (genre of genres(); track genre.id) {
+                <button
+                  type="button"
+                  class="genre-option"
+                  [attr.aria-pressed]="
+                    filtersModel().genreIds.includes(genre.id)
+                  "
+                  (click)="toggleGenre(genre.id)"
+                >
+                  {{ genre.name }}
+                </button>
+              } @empty {
+                <p class="text-sm text-muted">No genres available.</p>
+              }
+            </div>
+          }
+
+          <p id="movie-filter-genres-help" class="mt-2 text-xs text-muted">
+            Matches any selected genre.
+          </p>
+        </fieldset>
+      </div>
+      <div class="filter-section">
+        <fieldset aria-describedby="movie-filter-years-help">
+          <legend class="mb-2 text-sm font-medium">Release years</legend>
+          <p id="movie-filter-years-help" class="mb-3 text-xs text-muted">
+            Choose a year range, or leave either end open.
+          </p>
+
+          <div class="space-y-2">
+            <label for="movie-filter-from" class="block text-sm font-medium">
+              From year
+            </label>
+            <div class="filter-select">
+              <select
+                id="movie-filter-from"
+                [formField]="filtersForm.yearFrom"
+                [attr.aria-invalid]="
+                  filtersForm.yearFrom().touched() &&
+                  filtersForm.yearFrom().invalid()
+                "
+                aria-describedby="movie-filter-from-error"
+                class="filter-control"
+              >
+                <option value="">Any year</option>
+                @for (year of years(); track year) {
+                  <option [value]="year">{{ year }}</option>
+                }
+              </select>
+            </div>
+            <p
+              id="movie-filter-from-error"
+              aria-live="polite"
+              class="text-xs"
+              [hidden]="
+                !filtersForm.yearFrom().touched() ||
+                !filtersForm.yearFrom().invalid()
+              "
+            >
+              @if (
+                filtersForm.yearFrom().touched() &&
+                filtersForm.yearFrom().invalid()
+              ) {
+                Select a release year.
+              }
+            </p>
+          </div>
+
+          <div class="space-y-2">
+            <label for="movie-filter-to" class="block text-sm font-medium">
+              To year
+            </label>
+            <div class="filter-select">
+              <select
+                id="movie-filter-to"
+                [formField]="filtersForm.yearTo"
+                [attr.aria-invalid]="
+                  filtersForm.yearTo().touched() &&
+                  filtersForm.yearTo().invalid()
+                "
+                aria-describedby="movie-filter-to-error"
+                class="filter-control"
+              >
+                <option value="">Any year</option>
+                @for (year of years(); track year) {
+                  <option [value]="year">{{ year }}</option>
+                }
+              </select>
+            </div>
+            <p
+              id="movie-filter-to-error"
+              aria-live="polite"
+              class="text-xs"
+              [hidden]="
+                !filtersForm.yearTo().touched() ||
+                !filtersForm.yearTo().invalid()
+              "
+            >
+              @if (
+                filtersForm.yearTo().touched() && filtersForm.yearTo().invalid()
+              ) {
+                The end year must be the same as or later than the start year.
+              }
+            </p>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="filter-section">
+        <div class="flex items-center justify-between gap-2 text-sm">
+          <label for="movie-filter-rating" class="font-medium"
+            >Minimum rating</label
+          >
+          <output
+            for="movie-filter-rating"
+            class="shrink-0 font-medium tabular-nums"
+          >
+            {{
+              filtersModel().minRating === 0
+                ? 'Any'
+                : (filtersModel().minRating | number: '1.1-1') + ' / 10'
+            }}
+          </output>
+        </div>
+        <input
+          id="movie-filter-rating"
+          type="range"
+          step="0.1"
+          [formField]="filtersForm.minRating"
+          [attr.aria-valuetext]="
+            filtersModel().minRating === 0
+              ? 'No minimum rating'
+              : 'At least ' + filtersModel().minRating + ' out of 10'
+          "
+          class="filter-range"
+        />
+        <div aria-hidden="true" class="flex justify-between text-xs text-muted">
+          <span>0</span><span>5</span><span>10</span>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="flex items-center justify-between gap-2 text-sm">
+          <label for="movie-filter-votes" class="font-medium"
+            >Minimum votes</label
+          >
+          <output
+            for="movie-filter-votes"
+            class="shrink-0 font-medium tabular-nums"
+          >
+            {{
+              filtersModel().minVotes === 0
+                ? 'Any'
+                : (filtersModel().minVotes | number: '1.0-0')
+            }}
+          </output>
+        </div>
+        <input
+          id="movie-filter-votes"
+          type="range"
+          step="1"
+          [formField]="filtersForm.minVotes"
+          [attr.aria-valuetext]="
+            filtersModel().minVotes === 0
+              ? 'No minimum votes'
+              : 'At least ' + filtersModel().minVotes + ' votes'
+          "
+          class="filter-range"
+        />
+        <div aria-hidden="true" class="flex justify-between text-xs text-muted">
+          <span>0</span><span>{{ votesMaximum() / 2 | number: '1.0-0' }}</span
+          ><span>{{ votesMaximum() | number: '1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <div class="flex flex-wrap gap-3 pt-2">
+    <button type="submit" class="filter-apply">Apply</button>
+    <button type="button" class="filter-secondary" (click)="onReset()">
+      Reset
+    </button>
+  </div>
+</form>

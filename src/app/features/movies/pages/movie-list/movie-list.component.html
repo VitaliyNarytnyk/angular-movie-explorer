@@ -6,21 +6,50 @@
   [inert]="movieService.loading() && !movieService.catalogInitialized()"
 >
   <header
-    class="sticky top-0 z-10 flex flex-col gap-3 border-b border-divider bg-page py-4 sm:flex-row sm:items-center sm:gap-6"
+    class="sticky top-0 z-10 space-y-3 border-b border-divider bg-page py-4"
   >
-    <h2
-      #pageHeading
-      tabindex="-1"
-      class="w-fit shrink-0 text-2xl font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
-    >
-      Movies
-    </h2>
-
-    <app-movie-search
-      class="block min-w-0 flex-1"
-      [query]="searchQuery()"
-      (searchRequested)="onSearch($event)"
-    />
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <h2
+        #pageHeading
+        tabindex="-1"
+        class="w-fit text-2xl font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+      >
+        Movies
+      </h2>
+      <div
+        role="group"
+        aria-label="Movie browsing mode"
+        class="flex flex-wrap gap-2"
+      >
+        <button
+          type="button"
+          class="catalog-mode-button"
+          [attr.aria-pressed]="catalogMode() === 'search'"
+          (click)="onModeChange('search')"
+        >
+          Search by title
+        </button>
+        <button
+          type="button"
+          class="catalog-mode-button"
+          [attr.aria-pressed]="catalogMode() === 'discover'"
+          (click)="onModeChange('discover')"
+        >
+          Discover movies
+        </button>
+      </div>
+    </div>
+    @if (catalogMode() === 'search') {
+      <app-movie-search
+        class="block"
+        [query]="searchQuery()"
+        (searchRequested)="onSearch($event)"
+      />
+    } @else {
+      <p class="text-sm text-muted">
+        Choose genres, release years or a rating to find your next movie.
+      </p>
+    }
   </header>
 
   <div class="flex h-12 items-center">
@@ -33,34 +62,65 @@
   </div>
 
   <div
-    [attr.aria-busy]="movieService.loading()"
-    [inert]="movieService.loading()"
+    class="grid items-start gap-6"
+    [class]="
+      catalogMode() === 'discover' ? 'lg:grid-cols-[14rem_minmax(0,1fr)]' : ''
+    "
   >
-    @if (movieService.error(); as error) {
-      <p role="alert">{{ error }}</p>
-    } @else {
-      <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        @for (movie of movieService.movies(); track movie.id) {
-          <li>
-            <app-movie-card [movie]="movie" [priority]="$index < 8" />
-          </li>
-        } @empty {
-          @if (!movieService.loading()) {
-            <li class="col-span-full py-12 text-center text-muted">
-              No movies found. Try a different search.
-            </li>
-          }
-        }
-      </ul>
+    @if (catalogMode() === 'discover') {
+      <aside aria-label="Movie filters" class="min-w-0">
+        <app-movie-filters
+          class="block"
+          [filters]="selectedFilters()"
+          [genres]="movieService.genres()"
+          [genresLoading]="movieService.genresLoading()"
+          [genresError]="movieService.genresError()"
+          (genresRetryRequested)="movieService.getGenres()"
+          (filtersApplied)="onFiltersApplied($event)"
+        />
+      </aside>
     }
 
-    @if (movieService.totalPages() > 1 && !movieService.error()) {
-      <app-pagination
-        [currentPage]="movieService.currentPage()"
-        [totalPages]="movieService.totalPages()"
-        [disabled]="movieService.loading()"
-        (pageChanged)="goToPage($event)"
-      />
-    }
+    <div
+      class="min-w-0"
+      [attr.aria-busy]="movieService.loading()"
+      [inert]="movieService.loading()"
+    >
+      @if (movieService.error(); as error) {
+        <p role="alert">{{ error }}</p>
+        <button
+          type="button"
+          class="catalog-mode-button mt-4"
+          (click)="retryCatalog()"
+        >
+          Retry loading movies
+        </button>
+      } @else {
+        <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          @for (movie of movieService.movies(); track movie.id) {
+            <li><app-movie-card [movie]="movie" [priority]="$index < 8" /></li>
+          } @empty {
+            @if (!movieService.loading()) {
+              <li class="col-span-full py-12 text-center text-muted">
+                No movies found.
+                {{
+                  catalogMode() === 'discover'
+                    ? 'Try different filters or reset them.'
+                    : 'Try a different search.'
+                }}
+              </li>
+            }
+          }
+        </ul>
+      }
+      @if (movieService.totalPages() > 1 && !movieService.error()) {
+        <app-pagination
+          [currentPage]="movieService.currentPage()"
+          [totalPages]="movieService.totalPages()"
+          [disabled]="movieService.loading()"
+          (pageChanged)="goToPage($event)"
+        />
+      }
+    </div>
   </div>
 </section>

@@ -7,10 +7,10 @@ import {
 } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
-import { MovieService } from '../../services/movie.service';
+import { MovieService } from '@features/movies/services/movie.service';
 import { MovieDetailComponent } from './movie-detail.component';
 import { signal } from '@angular/core';
-import { MovieDetails } from '../../models/movie-details.model';
+import type { MovieDetails } from '@features/movies/models/movie-details.model';
 
 describe('MovieDetailComponent', () => {
   let fixture: ComponentFixture<MovieDetailComponent>;
@@ -21,6 +21,10 @@ describe('MovieDetailComponent', () => {
   const movieDetails = signal<MovieDetails | null>(null);
   const detailsLoading = signal(false);
   const detailsError = signal<string | null>(null);
+  const getSimilarMovies = vi.fn();
+  const similarMovies = signal<MovieDetails[]>([]);
+  const similarLoading = signal(false);
+  const similarError = signal<string | null>(null);
 
   const movie: MovieDetails = {
     id: 497,
@@ -29,6 +33,13 @@ describe('MovieDetailComponent', () => {
     poster_path: '/the-green-mile.jpg',
     release_date: '1999-12-10',
     vote_average: 8.5,
+    vote_count: 1000,
+    original_title: 'The Green Mile',
+    original_language: 'en',
+    backdrop_path: null,
+    tagline: 'Miracles do happen.',
+    runtime: 189,
+    status: 'Released',
     genres: [
       { id: 18, name: 'Drama' },
       { id: 14, name: 'Fantasy' },
@@ -41,6 +52,10 @@ describe('MovieDetailComponent', () => {
     movieDetails.set(null);
     detailsLoading.set(false);
     detailsError.set(null);
+    getSimilarMovies.mockClear();
+    similarMovies.set([]);
+    similarLoading.set(false);
+    similarError.set(null);
 
     routeParams = new BehaviorSubject(convertToParamMap({ id: '497' }));
 
@@ -61,6 +76,10 @@ describe('MovieDetailComponent', () => {
             movieDetails: movieDetails.asReadonly(),
             detailsLoading: detailsLoading.asReadonly(),
             detailsError: detailsError.asReadonly(),
+            getSimilarMovies,
+            similarMovies: similarMovies.asReadonly(),
+            similarLoading: similarLoading.asReadonly(),
+            similarError: similarError.asReadonly(),
           },
         },
       ],
@@ -106,11 +125,14 @@ describe('MovieDetailComponent', () => {
   });
 
   it('displays the movie information and a link to the catalog', () => {
-    movieDetails.set(movie);
+    movieDetails.set({
+      ...movie,
+      backdrop_path: '/the-green-mile-backdrop.jpg',
+    });
     fixture.detectChanges();
 
     const text = (element.textContent ?? '').replace(/\s+/g, ' ').trim();
-    const poster = element.querySelector('img');
+    const poster = element.querySelector('img[alt="The Green Mile poster"]');
     const releaseDate = element.querySelector('time');
 
     expect(element.querySelector('#movie-title')?.textContent).toContain(
@@ -153,6 +175,59 @@ describe('MovieDetailComponent', () => {
     ]) {
       expect(element.textContent).toContain(message);
     }
+  });
+
+  it('shows runtime, cast and director from the expanded details', () => {
+    movieDetails.set({
+      ...movie,
+      credits: {
+        cast: [
+          {
+            id: 31,
+            credit_id: 'paul',
+            name: 'Tom Hanks',
+            character: 'Paul Edgecomb',
+            profile_path: null,
+          },
+        ],
+        crew: [{ id: 4027, name: 'Frank Darabont', job: 'Director' }],
+      },
+    });
+    fixture.detectChanges();
+    expect(element.textContent).toContain('189 min');
+    expect(element.textContent).toContain('Tom Hanks');
+    expect(element.textContent).toContain('Frank Darabont');
+    expect(getSimilarMovies).toHaveBeenCalledWith(497);
+  });
+
+  it('keeps the main movie visible when similar movies fail', () => {
+    movieDetails.set(movie);
+    similarError.set('Unable to load similar movies. Please try again.');
+    fixture.detectChanges();
+    expect(element.querySelector('#movie-title')?.textContent).toContain(
+      'The Green Mile',
+    );
+    expect(element.querySelector('[role="alert"]')?.textContent).toContain(
+      'Unable to load similar movies',
+    );
+    getSimilarMovies.mockClear();
+    element
+      .querySelector<HTMLButtonElement>(
+        'section[aria-labelledby="similar-heading"] button',
+      )
+      ?.click();
+    expect(getSimilarMovies).toHaveBeenCalledExactlyOnceWith(497);
+  });
+
+  it('reuses movie cards to display similar movies', () => {
+    movieDetails.set(movie);
+    similarMovies.set([
+      { ...movie, id: 37165, title: 'The Truman Show', poster_path: null },
+    ]);
+    fixture.detectChanges();
+    expect(element.querySelector('app-movie-card')?.textContent).toContain(
+      'The Truman Show',
+    );
   });
 
   it.each(['abc', '0', '-1', '1.5'])(

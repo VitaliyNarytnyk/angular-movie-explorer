@@ -1,4 +1,4 @@
-import { Movie } from './movie.model';
+import type { Movie } from '@features/movies/models/movie.model';
 
 export interface MovieListResponse {
   page: number;

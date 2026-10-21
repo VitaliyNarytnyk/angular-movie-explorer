@@ -1,0 +1,11 @@
+@reference '#styles';
+
+@layer components {
+  .catalog-mode-button {
+    @apply min-h-11 cursor-pointer rounded-lg bg-surface-raised px-4 py-2 text-sm font-medium text-content hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent;
+  }
+
+  .catalog-mode-button[aria-pressed='true'] {
+    @apply bg-accent text-on-accent;
+  }
+}

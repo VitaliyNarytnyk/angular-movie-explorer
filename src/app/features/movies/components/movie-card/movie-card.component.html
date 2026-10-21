@@ -32,6 +32,21 @@
 
   <h3 class="text-lg font-semibold">{{ movie().title }}</h3>
 
+  <p class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted">
+    @if (movie().release_date) {
+      <time [attr.datetime]="movie().release_date">{{
+        movie().release_date | date: 'yyyy'
+      }}</time>
+    }
+    <span>
+      @if (movie().vote_average > 0) {
+        {{ movie().vote_average | number: '1.1-1' }} / 10
+      } @else {
+        No ratings
+      }
+    </span>
+  </p>
+
   <p class="mt-2 line-clamp-3 text-sm text-muted">
     {{ movie().overview || 'No description available.' }}
   </p>

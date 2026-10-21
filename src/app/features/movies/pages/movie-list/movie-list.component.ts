@@ -14,8 +14,19 @@ import { MovieService } from '@features/movies/services/movie.service';
 import { distinctUntilChanged, map } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadingIndicatorComponent } from '@shared/components/loading-indicator/loading-indicator.component';
-import { MAX_MOVIE_PAGES } from '@features/movies/constants/movie.constants';
+import { DEFAULT_MOVIE_FILTERS } from '@features/movies/constants/movie.constants';
 import { PaginationComponent } from '@shared/components/pagination/pagination.component';
+import { MovieFiltersComponent } from '@features/movies/components/movie-filters/movie-filters.component';
+import type {
+  MovieCatalogMode,
+  MovieCatalogQuery,
+} from '@features/movies/models/movie-catalog-query.model';
+import type { MovieFilters } from '@features/movies/models/movie-filters.model';
+import {
+  movieCatalogQueriesEqual,
+  movieCatalogQueryParams,
+  parseMovieCatalogQuery,
+} from '@features/movies/utils/movie-catalog-query.util';
 
 @Component({
   imports: [
@@ -23,6 +34,7 @@ import { PaginationComponent } from '@shared/components/pagination/pagination.co
     MovieSearchComponent,
     LoadingIndicatorComponent,
     PaginationComponent,
+    MovieFiltersComponent,
   ],
   selector: 'app-movie-list',
   styleUrl: './movie-list.component.css',
@@ -36,9 +48,15 @@ export class MovieListComponent {
 
   protected readonly movieService = inject(MovieService);
 
-  private readonly catalogQuery = signal({ query: '', page: 1 });
+  private readonly catalogQuery = signal<MovieCatalogQuery>(
+    parseMovieCatalogQuery(this.route.snapshot.queryParamMap),
+  );
 
   protected readonly searchQuery = computed(() => this.catalogQuery().query);
+  protected readonly catalogMode = computed(() => this.catalogQuery().mode);
+  protected readonly selectedFilters = computed(
+    () => this.catalogQuery().filters,
+  );
 
   constructor() {
     if (this.router.lastSuccessfulNavigation() !== null) {
@@ -51,51 +69,47 @@ export class MovieListComponent {
 
     this.route.queryParamMap
       .pipe(
-        map((params) => {
-          const page = Number(params.get('page') ?? '1');
-
-          return {
-            query: (params.get('query') ?? '').trim(),
-            page:
-              Number.isInteger(page) && page >= 1 && page <= MAX_MOVIE_PAGES
-                ? page
-                : 1,
-          };
-        }),
-        distinctUntilChanged(
-          (previous, current) =>
-            previous.query === current.query && previous.page === current.page,
-        ),
+        map(parseMovieCatalogQuery),
+        distinctUntilChanged(movieCatalogQueriesEqual),
         takeUntilDestroyed(),
       )
-      .subscribe(({ query, page }) => {
-        this.catalogQuery.set({ query, page });
-        this.loadCatalog(query, page);
+      .subscribe((state) => {
+        this.catalogQuery.set(state);
+        this.loadCatalog(state);
       });
   }
 
   protected onSearch(keyword: string): void {
-    const query = keyword.trim();
-    const currentQuery = this.catalogQuery();
+    const current = this.catalogQuery();
+    if (current.mode !== 'search') return;
 
-    if (
-      this.movieService.error() &&
-      query === currentQuery.query &&
-      currentQuery.page === 1
-    ) {
-      this.loadCatalog(query, 1);
-      return;
-    }
+    this.navigateCatalog({ ...current, query: keyword.trim(), page: 1 }, true);
+  }
 
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        query: query || null,
-        page: null,
-      },
-      queryParamsHandling: 'merge',
-      replaceUrl: true,
+  protected onModeChange(mode: MovieCatalogMode): void {
+    if (mode === this.catalogMode()) return;
+
+    this.navigateCatalog({
+      mode,
+      query: '',
+      page: 1,
+      filters: { ...DEFAULT_MOVIE_FILTERS, genreIds: [] },
     });
+  }
+
+  protected onFiltersApplied(filters: MovieFilters): void {
+    const current = this.catalogQuery();
+    if (current.mode !== 'discover') return;
+
+    this.navigateCatalog({
+      ...current,
+      page: 1,
+      filters,
+    });
+  }
+
+  protected retryCatalog(): void {
+    if (!this.movieService.loading()) this.loadCatalog(this.catalogQuery());
   }
 
   protected goToPage(page: number): void {
@@ -108,17 +122,28 @@ export class MovieListComponent {
       return;
     }
 
+    this.navigateCatalog({ ...this.catalogQuery(), page });
+  }
+
+  private navigateCatalog(state: MovieCatalogQuery, replaceUrl = false): void {
+    if (movieCatalogQueriesEqual(this.catalogQuery(), state)) {
+      if (this.movieService.error()) this.retryCatalog();
+      return;
+    }
+
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: {
-        page: page === 1 ? null : page,
-      },
+      queryParams: movieCatalogQueryParams(state),
       queryParamsHandling: 'merge',
+      replaceUrl,
     });
   }
 
-  private loadCatalog(query: string, page: number): void {
-    if (query) {
+  private loadCatalog({ mode, query, page, filters }: MovieCatalogQuery): void {
+    if (mode === 'discover') {
+      this.movieService.getGenres();
+      this.movieService.discoverMovies(filters, page);
+    } else if (query) {
       this.movieService.searchMovies(query, page);
     } else {
       this.movieService.getPopularMovies(page);

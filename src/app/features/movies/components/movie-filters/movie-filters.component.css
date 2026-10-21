@@ -1,0 +1,159 @@
+@layer components {
+  .filter-panel {
+    overflow: hidden;
+    border: 1px solid var(--divider-color);
+    border-radius: 0.75rem;
+    background: var(--surface-bg);
+  }
+
+  .filter-panel-heading {
+    display: flex;
+    min-height: 2.5rem;
+    cursor: pointer;
+    list-style: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 0.875rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+
+  .filter-panel-heading::-webkit-details-marker {
+    display: none;
+  }
+
+  .filter-panel[open] > .filter-panel-heading {
+    border-bottom: 1px solid var(--divider-color);
+  }
+
+  .filter-panel-heading::after,
+  .filter-select::after {
+    content: '';
+    width: 0.375rem;
+    height: 0.375rem;
+    flex-shrink: 0;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    pointer-events: none;
+  }
+
+  .filter-panel-heading::after {
+    transform: rotate(-45deg);
+    margin-right: 0.125rem;
+  }
+
+  .filter-panel[open] > .filter-panel-heading::after {
+    transform: rotate(45deg);
+  }
+
+  .filter-select {
+    position: relative;
+  }
+
+  .filter-select::after {
+    position: absolute;
+    right: 0.875rem;
+    top: 50%;
+    transform: translateY(-75%) rotate(45deg);
+  }
+
+  .filter-control {
+    height: 2.25rem;
+    min-width: 0;
+    width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: var(--surface-bg);
+    padding: 0.375rem 0.625rem;
+    color: var(--text-color);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    appearance: none;
+    padding-right: 2.5rem;
+  }
+
+  .genre-option {
+    min-height: 1.875rem;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    border-radius: 9999px;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.8125rem;
+    line-height: 1.125rem;
+  }
+
+  .genre-option[aria-pressed='true'] {
+    border-color: var(--accent-color);
+    background: var(--accent-color);
+    color: var(--on-accent-color);
+  }
+
+  .filter-sections {
+    padding: 0.875rem;
+  }
+
+  .filter-section + .filter-section {
+    margin-top: 1rem;
+    border-top: 1px solid var(--divider-color);
+    padding-top: 1rem;
+  }
+
+  .filter-range {
+    display: block;
+    width: 100%;
+    height: 2rem;
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--accent-color);
+  }
+
+  .filter-apply,
+  .filter-secondary {
+    min-height: 2.25rem;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  :is(
+    .filter-control,
+    .filter-range,
+    .genre-option,
+    .filter-panel-heading,
+    .filter-apply,
+    .filter-secondary
+  ):focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 4px;
+  }
+
+  .filter-control:focus-visible {
+    outline-offset: -2px;
+    border-color: var(--accent-color);
+  }
+
+  .filter-panel-heading:focus-visible {
+    outline-offset: -4px;
+  }
+
+  .filter-apply {
+    background: var(--accent-color);
+    color: var(--on-accent-color);
+    font-weight: 600;
+  }
+
+  .filter-apply:hover {
+    background: var(--accent-hover-color);
+  }
+
+  .filter-secondary {
+    background: var(--surface-raised-bg);
+    color: var(--text-color);
+  }
+
+  .filter-secondary:hover {
+    filter: brightness(1.1);
+  }
+}

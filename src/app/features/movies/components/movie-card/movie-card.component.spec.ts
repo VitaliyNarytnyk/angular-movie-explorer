@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Movie } from '../../models/movie.model';
+import type { Movie } from '@features/movies/models/movie.model';
 import { MovieCardComponent } from './movie-card.component';
 
 describe('MovieCardComponent', () => {
@@ -29,7 +29,7 @@ describe('MovieCardComponent', () => {
     const card = fixture.nativeElement as HTMLElement;
 
     expect(card.querySelector('h3')?.textContent).toBe(movie.title);
-    expect(card.querySelector('p')?.textContent).toContain(movie.overview);
+    expect(card.textContent).toContain(movie.overview);
     expect(card.querySelector('a')?.getAttribute('href')).toBe('/movies/497');
     expect(card.querySelector('img')?.getAttribute('src')).toBe(
       'https://image.tmdb.org/t/p/w500/the-green-mile.jpg',
@@ -48,9 +48,7 @@ describe('MovieCardComponent', () => {
 
     expect(card.querySelector('img')).toBeNull();
     expect(card.textContent).toContain('No poster available');
-    expect(card.querySelector('p')?.textContent).toContain(
-      'No description available.',
-    );
+    expect(card.textContent).toContain('No description available.');
   });
 
   it('updates the poster and link when the movie input changes', async () => {

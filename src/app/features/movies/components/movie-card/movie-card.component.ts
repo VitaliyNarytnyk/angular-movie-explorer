@@ -1,11 +1,11 @@
-import { NgOptimizedImage } from '@angular/common';
+import { DatePipe, DecimalPipe, NgOptimizedImage } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { Movie } from '@features/movies/models/movie.model';
-import { getMoviePosterUrl } from '@features/movies/utils/movie-poster.util';
+import { getMovieImageUrl } from '@features/movies/utils/movie-image.util';
 
 @Component({
-  imports: [RouterLink, NgOptimizedImage],
+  imports: [RouterLink, NgOptimizedImage, DatePipe, DecimalPipe],
   selector: 'app-movie-card',
   styleUrl: './movie-card.component.css',
   templateUrl: './movie-card.component.html',
@@ -15,6 +15,6 @@ export class MovieCardComponent {
   readonly priority = input(false);
 
   protected readonly posterUrl = computed(() =>
-    getMoviePosterUrl(this.movie().poster_path),
+    getMovieImageUrl(this.movie().poster_path),
   );
 }

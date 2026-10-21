@@ -1,5 +1,5 @@
 import {
-  afterNextRender,
+  afterRenderEffect,
   Component,
   computed,
   ElementRef,
@@ -13,7 +13,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, map } from 'rxjs';
 import { DatePipe, DecimalPipe, NgOptimizedImage } from '@angular/common';
 import { LoadingIndicatorComponent } from '@shared/components/loading-indicator/loading-indicator.component';
-import { getMoviePosterUrl } from '@features/movies/utils/movie-poster.util';
+import { getMovieImageUrl } from '@features/movies/utils/movie-image.util';
+import { MovieCardComponent } from '@features/movies/components/movie-card/movie-card.component';
 
 @Component({
   imports: [
@@ -22,6 +23,7 @@ import { getMoviePosterUrl } from '@features/movies/utils/movie-poster.util';
     DatePipe,
     DecimalPipe,
     LoadingIndicatorComponent,
+    MovieCardComponent,
   ],
   selector: 'app-movie-detail',
   styleUrl: './movie-detail.component.css',
@@ -37,17 +39,56 @@ export class MovieDetailComponent {
   protected readonly invalidId = signal(false);
 
   protected readonly posterUrl = computed(() =>
-    getMoviePosterUrl(this.movieService.movieDetails()?.poster_path),
+    getMovieImageUrl(this.movieService.movieDetails()?.poster_path),
+  );
+  protected readonly backdropUrl = computed(() =>
+    getMovieImageUrl(this.movieService.movieDetails()?.backdrop_path, 'w1280'),
+  );
+  protected readonly cast = computed(() =>
+    (this.movieService.movieDetails()?.credits?.cast ?? [])
+      .slice(0, 8)
+      .map((person) => ({
+        ...person,
+        photoUrl: getMovieImageUrl(person.profile_path, 'w185'),
+      })),
+  );
+  protected readonly directors = computed(() =>
+    (this.movieService.movieDetails()?.credits?.crew ?? [])
+      .filter((person) => person.job === 'Director')
+      .map((person) => person.name)
+      .join(', '),
   );
 
+  protected retrySimilarMovies(): void {
+    const movie = this.movieService.movieDetails();
+    if (movie && !this.movieService.similarLoading())
+      this.movieService.getSimilarMovies(movie.id);
+  }
+
   constructor() {
-    if (this.router.lastSuccessfulNavigation() !== null) {
-      afterNextRender({
-        write: () => {
+    const focusOnEntry = this.router.lastSuccessfulNavigation() !== null;
+    let displayedMovieId: number | null = null;
+
+    afterRenderEffect({
+      write: () => {
+        const movie = this.movieService.movieDetails();
+        if (
+          !movie ||
+          this.movieService.detailsLoading() ||
+          this.movieService.detailsError() ||
+          this.invalidId()
+        )
+          return;
+
+        if (
+          movie.id !== displayedMovieId &&
+          (displayedMovieId !== null || focusOnEntry)
+        ) {
           this.pageHeading()?.nativeElement.focus();
-        },
-      });
-    }
+        }
+        displayedMovieId = movie.id;
+      },
+    });
 
     this.route.paramMap
       .pipe(
@@ -62,6 +103,7 @@ export class MovieDetailComponent {
 
         if (valid) {
           this.movieService.getMovieDetails(id);
+          this.movieService.getSimilarMovies(id);
         }
       });
   }

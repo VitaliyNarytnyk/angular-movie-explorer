@@ -3,10 +3,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { vi } from 'vitest';
 import { By } from '@angular/platform-browser';
-import { MovieSearchComponent } from '../../components/movie-search/movie-search.component';
-import { Movie } from '../../models/movie.model';
-import { MovieService } from '../../services/movie.service';
+import { MovieSearchComponent } from '@features/movies/components/movie-search/movie-search.component';
+import type { Movie } from '@features/movies/models/movie.model';
+import { MovieService } from '@features/movies/services/movie.service';
 import { MovieListComponent } from './movie-list.component';
+import { MovieFiltersComponent } from '@features/movies/components/movie-filters/movie-filters.component';
+import { PaginationComponent } from '@shared/components/pagination/pagination.component';
+import { DEFAULT_MOVIE_FILTERS } from '@features/movies/constants/movie.constants';
 
 describe('MovieListComponent', () => {
   let fixture: ComponentFixture<MovieListComponent>;
@@ -20,6 +23,11 @@ describe('MovieListComponent', () => {
   const totalPages = signal(0);
   const getPopularMovies = vi.fn();
   const searchMovies = vi.fn();
+  const discoverMovies = vi.fn();
+  const getGenres = vi.fn();
+  const genres = signal([]);
+  const genresLoading = signal(false);
+  const genresError = signal<string | null>(null);
 
   const movie: Movie = {
     id: 497,
@@ -38,6 +46,9 @@ describe('MovieListComponent', () => {
     currentPage.set(1);
     totalPages.set(0);
     getPopularMovies.mockClear();
+    searchMovies.mockClear();
+    discoverMovies.mockClear();
+    getGenres.mockClear();
 
     await TestBed.configureTestingModule({
       imports: [MovieListComponent],
@@ -54,6 +65,11 @@ describe('MovieListComponent', () => {
             totalPages: totalPages.asReadonly(),
             getPopularMovies,
             searchMovies,
+            discoverMovies,
+            getGenres,
+            genres: genres.asReadonly(),
+            genresLoading: genresLoading.asReadonly(),
+            genresError: genresError.asReadonly(),
           },
         },
       ],
@@ -185,4 +201,115 @@ describe('MovieListComponent', () => {
       expect(getPopularMovies).not.toHaveBeenCalled();
     },
   );
+
+  it('restores discovery filters and pagination from the URL', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigate([], {
+      queryParams: {
+        mode: 'discover',
+        genres: '18,14',
+        from: '1999',
+        to: '2000',
+        rating: 7,
+        votes: 100,
+        sort: 'vote_average.desc',
+        page: 2,
+      },
+    });
+    await fixture.whenStable();
+
+    expect(getGenres).toHaveBeenCalled();
+    expect(discoverMovies).toHaveBeenLastCalledWith(
+      {
+        ...DEFAULT_MOVIE_FILTERS,
+        genreIds: [14, 18],
+        yearFrom: 1999,
+        yearTo: 2000,
+        minRating: 7,
+        minVotes: 100,
+        sortBy: 'vote_average.desc',
+      },
+      2,
+    );
+    expect(element.querySelector('input[type="search"]')).toBeNull();
+  });
+
+  it('applies filters from page one and preserves them when changing pages', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigate([], { queryParams: { mode: 'discover', page: 3 } });
+    await fixture.whenStable();
+
+    const filters = {
+      ...DEFAULT_MOVIE_FILTERS,
+      genreIds: [18],
+      sortBy: 'original_title.asc' as const,
+      yearFrom: 1999,
+      yearTo: 2000,
+    };
+    const form = fixture.debugElement.query(By.directive(MovieFiltersComponent))
+      .componentInstance as MovieFiltersComponent;
+    form.filtersApplied.emit(filters);
+    await fixture.whenStable();
+
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      mode: 'discover',
+      genres: '18',
+      sort: 'original_title.asc',
+      from: '1999',
+      to: '2000',
+    });
+    expect(discoverMovies).toHaveBeenLastCalledWith(filters, 1);
+
+    currentPage.set(1);
+    totalPages.set(3);
+    fixture.detectChanges();
+    const pagination = fixture.debugElement.query(
+      By.directive(PaginationComponent),
+    ).componentInstance as PaginationComponent;
+    pagination.pageChanged.emit(2);
+    await fixture.whenStable();
+
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      mode: 'discover',
+      genres: '18',
+      sort: 'original_title.asc',
+      from: '1999',
+      to: '2000',
+      page: '2',
+    });
+    expect(discoverMovies).toHaveBeenLastCalledWith(filters, 2);
+  });
+
+  it('ignores legacy year filters in title search', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigate([], {
+      queryParams: { query: 'The Green Mile', year: 1999 },
+    });
+    await fixture.whenStable();
+
+    expect(searchMovies).toHaveBeenLastCalledWith('The Green Mile', 1);
+    expect(element.querySelector('app-movie-filters')).toBeNull();
+    expect(getGenres).not.toHaveBeenCalled();
+  });
+
+  it('clears incompatible filters when switching back to title search', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigate([], {
+      queryParams: {
+        mode: 'discover',
+        genres: '18',
+        from: '1999',
+        to: '2000',
+        rating: 7,
+        page: 2,
+      },
+    });
+    await fixture.whenStable();
+
+    element.querySelector<HTMLButtonElement>('[aria-pressed="false"]')?.click();
+    await fixture.whenStable();
+
+    expect(router.parseUrl(router.url).queryParams).toEqual({});
+    expect(getPopularMovies).toHaveBeenLastCalledWith(1);
+  });
 });
