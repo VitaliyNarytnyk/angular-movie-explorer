@@ -13,7 +13,7 @@ import { MovieSearchComponent } from '../../components/movie-search/movie-search
 import { MovieService } from '../../services/movie.service';
 import { distinctUntilChanged, map } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { LoadingIndicatorComponent } from '../../../../shared/components/loading-indicator/loading-indicator.component';
+import { LoadingIndicatorComponent } from '@shared/components/loading-indicator/loading-indicator.component';
 
 @Component({
   imports: [

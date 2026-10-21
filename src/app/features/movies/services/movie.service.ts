@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Service, signal } from '@angular/core';
 import { Movie } from '../models/movie.model';
 import { MovieListResponse } from '../models/movie-list-response.model';
-import { environment } from '../../../../environments/environment.local';
+import { environment } from '@env/environment.local';
 import {
   catchError,
   EMPTY,

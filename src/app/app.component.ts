@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { LoadingIndicatorComponent } from './shared/components/loading-indicator/loading-indicator.component';
-import { ThemeService } from './core/services/theme.service';
+import { LoadingIndicatorComponent } from '@shared/components/loading-indicator/loading-indicator.component';
+import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   imports: [RouterOutlet, LoadingIndicatorComponent],

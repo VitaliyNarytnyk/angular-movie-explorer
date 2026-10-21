@@ -12,7 +12,7 @@ import { MovieService } from '../../services/movie.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, map } from 'rxjs';
 import { DatePipe, DecimalPipe, NgOptimizedImage } from '@angular/common';
-import { LoadingIndicatorComponent } from '../../../../shared/components/loading-indicator/loading-indicator.component';
+import { LoadingIndicatorComponent } from '@shared/components/loading-indicator/loading-indicator.component';
 
 @Component({
   imports: [
