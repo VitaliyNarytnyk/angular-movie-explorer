@@ -8,4 +8,12 @@
   .loading-spinner {
     @apply size-10 rounded-full border-4 border-outline border-t-accent motion-safe:animate-spin;
   }
+
+  .loading-inline {
+    @apply flex items-center gap-2 text-muted;
+  }
+
+  .loading-inline .loading-spinner {
+    @apply size-4 border-2;
+  }
 }

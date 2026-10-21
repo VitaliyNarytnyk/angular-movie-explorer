@@ -1,12 +1,22 @@
-import { Component, output, input, linkedSignal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, input, linkedSignal, output } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { form, FormField } from '@angular/forms/signals';
-import { debounce, distinctUntilChanged, of, Subject, timer } from 'rxjs';
+import {
+  distinctUntilChanged,
+  EMPTY,
+  map,
+  merge,
+  of,
+  Subject,
+  switchMap,
+  timer,
+} from 'rxjs';
 
 interface SearchRequest {
   keyword: string;
-  immediate: boolean;
+  source: 'input' | 'submit' | 'url';
 }
+
 @Component({
   imports: [FormField],
   selector: 'app-movie-search',
@@ -20,23 +30,37 @@ export class MovieSearchComponent {
   private readonly searchModel = linkedSignal(() => ({
     keyword: this.query(),
   }));
+
   private readonly searchRequests = new Subject<SearchRequest>();
 
   protected readonly searchForm = form(this.searchModel);
 
   constructor() {
-    this.searchRequests
+    const urlQueries = toObservable(this.query).pipe(
+      map((keyword): SearchRequest => ({
+        keyword,
+        source: 'url',
+      })),
+    );
+
+    merge(this.searchRequests, urlQueries)
       .pipe(
         distinctUntilChanged(
           (previous, current) =>
-            !current.immediate && previous.keyword === current.keyword,
+            current.source === 'input' && previous.keyword === current.keyword,
         ),
-        debounce(({ keyword, immediate }) =>
-          immediate || keyword === '' ? of(0) : timer(300),
-        ),
+        switchMap(({ keyword, source }) => {
+          if (source === 'url') {
+            return EMPTY;
+          }
+
+          return source === 'submit' || keyword === ''
+            ? of(keyword)
+            : timer(300).pipe(map(() => keyword));
+        }),
         takeUntilDestroyed(),
       )
-      .subscribe(({ keyword }) => {
+      .subscribe((keyword) => {
         this.searchRequested.emit(keyword);
       });
   }
@@ -46,7 +70,7 @@ export class MovieSearchComponent {
 
     this.searchRequests.next({
       keyword: input.value.trim(),
-      immediate: false,
+      source: 'input',
     });
   }
 
@@ -55,7 +79,7 @@ export class MovieSearchComponent {
 
     this.searchRequests.next({
       keyword: this.searchModel().keyword.trim(),
-      immediate: true,
+      source: 'submit',
     });
   }
 }

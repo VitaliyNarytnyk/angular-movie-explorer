@@ -1,8 +1,8 @@
-@if (router.currentNavigation()) {
+@if (pageNavigating()) {
   <app-loading-indicator message="Loading page..." />
 }
 <main
-  [inert]="router.currentNavigation() !== null"
+  [inert]="pageNavigating()"
   class="min-h-screen bg-page px-6 py-16 text-content"
 >
   <div class="mx-auto max-w-6xl">

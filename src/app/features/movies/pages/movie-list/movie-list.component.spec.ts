@@ -14,6 +14,7 @@ describe('MovieListComponent', () => {
 
   const movies = signal<Movie[]>([]);
   const loading = signal(false);
+  const catalogInitialized = signal(false);
   const error = signal<string | null>(null);
   const currentPage = signal(1);
   const totalPages = signal(0);
@@ -32,6 +33,7 @@ describe('MovieListComponent', () => {
   beforeEach(async () => {
     movies.set([]);
     loading.set(false);
+    catalogInitialized.set(false);
     error.set(null);
     currentPage.set(1);
     totalPages.set(0);
@@ -46,6 +48,7 @@ describe('MovieListComponent', () => {
           useValue: {
             movies: movies.asReadonly(),
             loading: loading.asReadonly(),
+            catalogInitialized: catalogInitialized.asReadonly(),
             error: error.asReadonly(),
             currentPage: currentPage.asReadonly(),
             totalPages: totalPages.asReadonly(),

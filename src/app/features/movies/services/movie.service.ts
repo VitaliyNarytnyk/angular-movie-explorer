@@ -25,6 +25,7 @@ export class MovieService {
 
   private readonly movieState = signal<Movie[]>([]);
   private readonly loadingState = signal(false);
+  private readonly catalogInitializedState = signal(false);
   private readonly errorState = signal<string | null>(null);
   private readonly currentPageState = signal(1);
   private readonly totalPageState = signal(0);
@@ -35,6 +36,7 @@ export class MovieService {
 
   readonly movies = this.movieState.asReadonly();
   readonly loading = this.loadingState.asReadonly();
+  readonly catalogInitialized = this.catalogInitializedState.asReadonly();
   readonly error = this.errorState.asReadonly();
   readonly currentPage = this.currentPageState.asReadonly();
   readonly totalPages = this.totalPageState.asReadonly();
@@ -53,6 +55,7 @@ export class MovieService {
         this.movieState.set(response.results);
         this.currentPageState.set(response.page);
         this.totalPageState.set(Math.min(response.total_pages, 500));
+        this.catalogInitializedState.set(true);
       });
 
     this.moviesIds
@@ -103,6 +106,7 @@ export class MovieService {
         catchError(() => {
           this.movieState.set([]);
           this.errorState.set('Unable to load movies. Please try again.');
+          this.catalogInitializedState.set(true);
 
           return EMPTY;
         }),

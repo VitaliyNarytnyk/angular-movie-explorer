@@ -1,4 +1,8 @@
-<div role="status" class="loading-overlay">
+<div
+  role="status"
+  [class.loading-overlay]="fullscreen()"
+  [class.loading-inline]="!fullscreen()"
+>
   <span aria-hidden="true" class="loading-spinner"></span>
 
   <p class="text-sm">{{ message() }}</p>

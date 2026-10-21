@@ -1,13 +1,12 @@
-@if (movieService.loading()) {
+@if (movieService.loading() && !movieService.catalogInitialized()) {
   <app-loading-indicator message="Loading movies..." />
 }
 <section
   class="mt-8"
-  [attr.aria-busy]="movieService.loading()"
-  [inert]="movieService.loading()"
+  [inert]="movieService.loading() && !movieService.catalogInitialized()"
 >
   <header
-    class="sticky top-0 z-10 mb-6 flex flex-col gap-3 border-b border-divider bg-page py-4 sm:flex-row sm:items-center sm:gap-6"
+    class="sticky top-0 z-10 flex flex-col gap-3 border-b border-divider bg-page py-4 sm:flex-row sm:items-center sm:gap-6"
   >
     <h2
       #pageHeading
@@ -24,95 +23,114 @@
     />
   </header>
 
-  @if (movieService.error(); as error) {
-    <p role="alert">{{ error }}</p>
-  } @else {
-    <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      @for (movie of movieService.movies(); track movie.id) {
-        <li>
-          <app-movie-card [movie]="movie" [priority]="$index < 8" />
-        </li>
-      } @empty {
-        <li>No movies found.</li>
-      }
-    </ul>
-  }
+  <div class="flex h-12 items-center">
+    @if (movieService.loading() && movieService.catalogInitialized()) {
+      <app-loading-indicator
+        [fullscreen]="false"
+        message="Updating movies..."
+      />
+    }
+  </div>
 
-  @if (movieService.totalPages() > 1 && !movieService.error()) {
-    <nav
-      aria-label="Movie pagination"
-      class="mt-8 flex flex-wrap items-center justify-center gap-2"
-    >
-      <button
-        type="button"
-        aria-label="Previous page"
-        [disabled]="movieService.loading() || movieService.currentPage() <= 1"
-        (click)="goToPage(movieService.currentPage() - 1)"
-        class="pagination-button inline-flex items-center justify-center px-3"
+  <div
+    [attr.aria-busy]="movieService.loading()"
+    [inert]="movieService.loading()"
+  >
+    @if (movieService.error(); as error) {
+      <p role="alert">{{ error }}</p>
+    } @else {
+      <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        @for (movie of movieService.movies(); track movie.id) {
+          <li>
+            <app-movie-card [movie]="movie" [priority]="$index < 8" />
+          </li>
+        } @empty {
+          @if (!movieService.loading()) {
+            <li class="col-span-full py-12 text-center text-muted">
+              No movies found. Try a different search.
+            </li>
+          }
+        }
+      </ul>
+    }
+
+    @if (movieService.totalPages() > 1 && !movieService.error()) {
+      <nav
+        aria-label="Movie pagination"
+        class="mt-8 flex flex-wrap items-center justify-center gap-2"
       >
-        <svg
-          class="size-5"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <path d="m12 19-7-7 7-7M5 12h14" />
-        </svg>
-      </button>
-
-      @for (page of desktopPages(); track page) {
         <button
           type="button"
-          [attr.aria-label]="'Go to page ' + page"
-          [attr.aria-current]="
-            page === movieService.currentPage() ? 'page' : null
-          "
-          [disabled]="movieService.loading()"
-          [class.hidden]="!mobilePages().includes(page)"
-          (click)="goToPage(page)"
-          class="pagination-button px-2 font-medium tabular-nums sm:inline-block"
+          aria-label="Previous page"
+          [disabled]="movieService.loading() || movieService.currentPage() <= 1"
+          (click)="goToPage(movieService.currentPage() - 1)"
+          class="pagination-button inline-flex items-center justify-center px-3"
         >
-          {{ page }}
+          <svg
+            class="size-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="m12 19-7-7 7-7M5 12h14" />
+          </svg>
         </button>
-      }
 
-      <button
-        type="button"
-        aria-label="Next page"
-        [disabled]="
-          movieService.loading() ||
-          movieService.currentPage() >= movieService.totalPages()
-        "
-        (click)="goToPage(movieService.currentPage() + 1)"
-        class="pagination-button inline-flex items-center justify-center px-3"
-      >
-        <svg
-          class="size-5"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-          focusable="false"
+        @for (page of desktopPages(); track page) {
+          <button
+            type="button"
+            [attr.aria-label]="'Go to page ' + page"
+            [attr.aria-current]="
+              page === movieService.currentPage() ? 'page' : null
+            "
+            [disabled]="movieService.loading()"
+            [class.hidden]="!mobilePages().includes(page)"
+            (click)="goToPage(page)"
+            class="pagination-button px-2 font-medium tabular-nums sm:inline-block"
+          >
+            {{ page }}
+          </button>
+        }
+
+        <button
+          type="button"
+          aria-label="Next page"
+          [disabled]="
+            movieService.loading() ||
+            movieService.currentPage() >= movieService.totalPages()
+          "
+          (click)="goToPage(movieService.currentPage() + 1)"
+          class="pagination-button inline-flex items-center justify-center px-3"
         >
-          <path d="m12 5 7 7-7 7M5 12h14" />
-        </svg>
-      </button>
+          <svg
+            class="size-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="m12 5 7 7-7 7M5 12h14" />
+          </svg>
+        </button>
 
-      <span
-        aria-live="polite"
-        aria-atomic="true"
-        class="order-last basis-full text-center text-sm text-muted"
-      >
-        Page {{ movieService.currentPage() }} of {{ movieService.totalPages() }}
-      </span>
-    </nav>
-  }
+        <span
+          aria-live="polite"
+          aria-atomic="true"
+          class="order-last basis-full text-center text-sm text-muted"
+        >
+          Page {{ movieService.currentPage() }} of
+          {{ movieService.totalPages() }}
+        </span>
+      </nav>
+    }
+  </div>
 </section>

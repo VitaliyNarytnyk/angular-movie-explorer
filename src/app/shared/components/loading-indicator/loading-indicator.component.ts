@@ -10,4 +10,5 @@ import { Component, input } from '@angular/core';
 })
 export class LoadingIndicatorComponent {
   readonly message = input('Loading...');
+  readonly fullscreen = input(true);
 }
