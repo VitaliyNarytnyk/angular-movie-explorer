@@ -38,7 +38,7 @@ describe('MovieFiltersComponent', () => {
   }
 
   it('keeps changes as a draft until applied', async () => {
-    element.querySelector<HTMLButtonElement>('.genre-option')?.click();
+    element.querySelector<HTMLButtonElement>('button[aria-pressed]')?.click();
     await enter('#movie-filter-from', '1999');
     await enter('#movie-filter-to', '2000');
     await enter('#movie-filter-rating', '7.5');
@@ -128,7 +128,9 @@ describe('MovieFiltersComponent', () => {
   });
 
   it('toggles genre buttons without applying the draft', async () => {
-    const genre = element.querySelector<HTMLButtonElement>('.genre-option');
+    const genre = element.querySelector<HTMLButtonElement>(
+      'button[aria-pressed]',
+    );
     genre?.click();
     await fixture.whenStable();
     expect(genre?.getAttribute('aria-pressed')).toBe('true');
@@ -184,7 +186,9 @@ describe('MovieFiltersComponent', () => {
       element.querySelector<HTMLSelectElement>('#movie-filter-from')?.value,
     ).toBe('');
     expect(
-      element.querySelector('.genre-option')?.getAttribute('aria-pressed'),
+      element
+        .querySelector('button[aria-pressed]')
+        ?.getAttribute('aria-pressed'),
     ).toBe('false');
   });
 

@@ -24,7 +24,7 @@
           </div>
           <button
             type="button"
-            class="filter-secondary inline-flex min-w-11 shrink-0 items-center justify-center px-2"
+            class="btn btn-compact min-w-11 shrink-0 px-2"
             [attr.aria-label]="
               filtersModel().sortDirection === 'asc'
                 ? 'Switch to descending order'
@@ -81,7 +81,7 @@
 
             <button
               type="button"
-              class="filter-secondary mt-3"
+              class="btn btn-compact mt-3"
               (click)="genresRetryRequested.emit()"
             >
               Retry loading genres
@@ -91,7 +91,7 @@
               @for (genre of genres(); track genre.id) {
                 <button
                   type="button"
-                  class="genre-option"
+                  class="btn btn-chip"
                   [attr.aria-pressed]="
                     filtersModel().genreIds.includes(genre.id)
                   "
@@ -266,8 +266,8 @@
   </details>
 
   <div class="flex flex-wrap gap-3 pt-2">
-    <button type="submit" class="filter-apply">Apply</button>
-    <button type="button" class="filter-secondary" (click)="onReset()">
+    <button type="submit" class="btn btn-primary btn-compact">Apply</button>
+    <button type="button" class="btn btn-compact" (click)="onReset()">
       Reset
     </button>
   </div>

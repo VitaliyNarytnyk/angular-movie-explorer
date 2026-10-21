@@ -1,10 +1,11 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { containsTree, Router, RouterOutlet } from '@angular/router';
 import { LoadingIndicatorComponent } from '@shared/components/loading-indicator/loading-indicator.component';
+import { BrandLinkComponent } from '@shared/components/brand-link/brand-link.component';
 import { ThemeService } from '@core/services/theme.service';
 
 @Component({
-  imports: [RouterOutlet, LoadingIndicatorComponent],
+  imports: [RouterOutlet, LoadingIndicatorComponent, BrandLinkComponent],
   selector: 'app-root',
   styleUrl: './app.component.css',
   templateUrl: './app.component.html',
@@ -33,6 +34,4 @@ export class AppComponent {
   });
 
   protected readonly themeService = inject(ThemeService);
-
-  protected readonly title = signal('angular-movie-explorer');
 }

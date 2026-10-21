@@ -14,6 +14,7 @@ import { distinctUntilChanged, map } from 'rxjs';
 import { DatePipe, DecimalPipe, NgOptimizedImage } from '@angular/common';
 import { LoadingIndicatorComponent } from '@shared/components/loading-indicator/loading-indicator.component';
 import { getMovieImageUrl } from '@features/movies/utils/movie-image.util';
+import { CarouselComponent } from '@shared/components/carousel/carousel.component';
 import { MovieCardComponent } from '@features/movies/components/movie-card/movie-card.component';
 
 @Component({
@@ -24,6 +25,7 @@ import { MovieCardComponent } from '@features/movies/components/movie-card/movie
     DecimalPipe,
     LoadingIndicatorComponent,
     MovieCardComponent,
+    CarouselComponent,
   ],
   selector: 'app-movie-detail',
   styleUrl: './movie-detail.component.css',
@@ -46,7 +48,7 @@ export class MovieDetailComponent {
   );
   protected readonly cast = computed(() =>
     (this.movieService.movieDetails()?.credits?.cast ?? [])
-      .slice(0, 8)
+      .slice(0, 20)
       .map((person) => ({
         ...person,
         photoUrl: getMovieImageUrl(person.profile_path, 'w185'),

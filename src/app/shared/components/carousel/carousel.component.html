@@ -1,0 +1,38 @@
+<div class="carousel-header">
+  @if (heading(); as title) {
+    <h3 [id]="headingId()" class="text-2xl font-semibold">{{ title }}</h3>
+  }
+  <div class="carousel-controls">
+    <button
+      class="btn btn-icon"
+      type="button"
+      [attr.aria-label]="'Scroll ' + label() + ' left'"
+      [disabled]="!canScrollBack()"
+      (click)="scroll(-1)"
+    >
+      <span
+        class="carousel-arrow carousel-arrow-back"
+        aria-hidden="true"
+      ></span>
+    </button>
+    <button
+      class="btn btn-icon"
+      type="button"
+      [attr.aria-label]="'Scroll ' + label() + ' right'"
+      [disabled]="!canScrollForward()"
+      (click)="scroll(1)"
+    >
+      <span class="carousel-arrow" aria-hidden="true"></span>
+    </button>
+  </div>
+</div>
+<div
+  #viewport
+  class="carousel-viewport"
+  tabindex="0"
+  role="group"
+  [attr.aria-label]="label() + ', horizontally scrollable list'"
+  (scroll)="updateControls()"
+>
+  <div #content class="carousel-content"><ng-content /></div>
+</div>

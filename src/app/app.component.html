@@ -3,19 +3,19 @@
 }
 <main
   [inert]="pageNavigating()"
-  class="min-h-screen bg-page px-6 py-16 text-content"
+  class="flex flex-1 flex-col bg-page px-6 pb-12 pt-10 text-content sm:pt-16"
 >
-  <div class="mx-auto max-w-[90rem]">
+  <div class="mx-auto w-full max-w-[90rem] flex-1">
     <header
       class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-4"
     >
       <h1 class="text-3xl font-bold tracking-tight text-accent sm:text-4xl">
-        Movie Explorer
+        <app-brand-link />
       </h1>
 
       <button
         type="button"
-        class="theme-toggle"
+        class="btn btn-icon px-3 sm:px-4"
         [attr.aria-label]="
           themeService.theme() === 'dark'
             ? 'Switch to light theme'
@@ -57,3 +57,9 @@
     <router-outlet />
   </div>
 </main>
+<footer class="site-footer" [inert]="pageNavigating()">
+  <div class="footer-content">
+    <app-brand-link />
+    <p>Find your next favorite story.</p>
+  </div>
+</footer>

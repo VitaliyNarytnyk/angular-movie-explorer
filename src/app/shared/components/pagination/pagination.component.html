@@ -7,7 +7,7 @@
     aria-label="Previous page"
     [disabled]="disabled() || currentPage() <= 1"
     (click)="pageChanged.emit(currentPage() - 1)"
-    class="pagination-button inline-flex items-center justify-center px-3"
+    class="btn btn-icon"
   >
     <svg
       class="size-5"
@@ -32,7 +32,7 @@
       [disabled]="disabled()"
       [class.hidden]="!mobilePages().includes(page)"
       (click)="pageChanged.emit(page)"
-      class="pagination-button px-2 font-medium tabular-nums sm:inline-block"
+      class="btn btn-icon tabular-nums sm:inline-flex"
     >
       {{ page }}
     </button>
@@ -43,7 +43,7 @@
     aria-label="Next page"
     [disabled]="disabled() || currentPage() >= totalPages()"
     (click)="pageChanged.emit(currentPage() + 1)"
-    class="pagination-button inline-flex items-center justify-center px-3"
+    class="btn btn-icon"
   >
     <svg
       class="size-5"

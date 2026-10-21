@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/manrope';
+@import './styles/buttons.css';
 
 @theme {
   --font-sans: 'Manrope Variable', ui-sans-serif, system-ui, sans-serif;
@@ -27,7 +28,7 @@
   --surface-bg: #0f172a;
   --surface-raised-bg: #1e293b;
   --border-color: #64748b;
-  --divider-color: var(--border-color);
+  --divider-color: #283244;
   --text-color: #f1f5f9;
   --muted-color: #94a3b8;
   --accent-color: #2dd4bf;
@@ -42,7 +43,7 @@
   --surface-bg: #f7f5ef;
   --surface-raised-bg: #dad8d1;
   --border-color: #8b867c;
-  --divider-color: #d3cec3;
+  --divider-color: #dedbd3;
   --text-color: #25282a;
   --muted-color: #5e5e5a;
   --accent-color: #0f766e;

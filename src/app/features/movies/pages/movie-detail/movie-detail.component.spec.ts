@@ -154,6 +154,31 @@ describe('MovieDetailComponent', () => {
     expect(element.querySelector('a')?.getAttribute('href')).toBe('/movies');
   });
 
+  it('recreates images when another movie replaces the current details', () => {
+    movieDetails.set({ ...movie, backdrop_path: '/green-mile-backdrop.jpg' });
+    fixture.detectChanges();
+    const previousImages = [...element.querySelectorAll('img')];
+
+    movieDetails.set({
+      ...movie,
+      id: 37165,
+      title: 'The Truman Show',
+      poster_path: '/truman-show.jpg',
+      backdrop_path: '/truman-show-backdrop.jpg',
+    });
+    fixture.detectChanges();
+
+    expect(previousImages).toHaveLength(2);
+    expect(previousImages.every((image) => !element.contains(image))).toBe(
+      true,
+    );
+    expect(
+      element
+        .querySelector('img[alt="The Truman Show poster"]')
+        ?.getAttribute('src'),
+    ).toBe('https://image.tmdb.org/t/p/w500/truman-show.jpg');
+  });
+
   it('displays fallbacks when optional movie information is unavailable', () => {
     movieDetails.set({
       ...movie,

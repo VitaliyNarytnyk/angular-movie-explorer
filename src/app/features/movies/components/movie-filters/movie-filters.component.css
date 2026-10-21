@@ -73,22 +73,6 @@
     padding-right: 2.5rem;
   }
 
-  .genre-option {
-    min-height: 1.875rem;
-    cursor: pointer;
-    border: 1px solid var(--border-color);
-    border-radius: 9999px;
-    padding: 0.25rem 0.625rem;
-    font-size: 0.8125rem;
-    line-height: 1.125rem;
-  }
-
-  .genre-option[aria-pressed='true'] {
-    border-color: var(--accent-color);
-    background: var(--accent-color);
-    color: var(--on-accent-color);
-  }
-
   .filter-sections {
     padding: 0.875rem;
   }
@@ -108,23 +92,7 @@
     accent-color: var(--accent-color);
   }
 
-  .filter-apply,
-  .filter-secondary {
-    min-height: 2.25rem;
-    cursor: pointer;
-    border-radius: 0.5rem;
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
-  }
-
-  :is(
-    .filter-control,
-    .filter-range,
-    .genre-option,
-    .filter-panel-heading,
-    .filter-apply,
-    .filter-secondary
-  ):focus-visible {
+  :is(.filter-control, .filter-range, .filter-panel-heading):focus-visible {
     outline: 2px solid var(--accent-color);
     outline-offset: 4px;
   }
@@ -136,24 +104,5 @@
 
   .filter-panel-heading:focus-visible {
     outline-offset: -4px;
-  }
-
-  .filter-apply {
-    background: var(--accent-color);
-    color: var(--on-accent-color);
-    font-weight: 600;
-  }
-
-  .filter-apply:hover {
-    background: var(--accent-hover-color);
-  }
-
-  .filter-secondary {
-    background: var(--surface-raised-bg);
-    color: var(--text-color);
-  }
-
-  .filter-secondary:hover {
-    filter: brightness(1.1);
   }
 }

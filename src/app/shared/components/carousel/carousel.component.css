@@ -1,0 +1,47 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.carousel-header {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.carousel-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.carousel-viewport:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 4px;
+}
+.carousel-arrow {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: translateX(-2px) rotate(45deg);
+}
+.carousel-arrow-back {
+  transform: translateX(2px) rotate(-135deg);
+}
+.carousel-viewport {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+  border-radius: 0.5rem;
+}
+.carousel-content {
+  width: max-content;
+  min-width: 100%;
+  padding: 0.25rem 0.25rem 1rem;
+}

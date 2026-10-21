@@ -23,7 +23,7 @@
       >
         <button
           type="button"
-          class="catalog-mode-button"
+          class="btn"
           [attr.aria-pressed]="catalogMode() === 'search'"
           (click)="onModeChange('search')"
         >
@@ -31,7 +31,7 @@
         </button>
         <button
           type="button"
-          class="catalog-mode-button"
+          class="btn"
           [attr.aria-pressed]="catalogMode() === 'discover'"
           (click)="onModeChange('discover')"
         >
@@ -88,11 +88,7 @@
     >
       @if (movieService.error(); as error) {
         <p role="alert">{{ error }}</p>
-        <button
-          type="button"
-          class="catalog-mode-button mt-4"
-          (click)="retryCatalog()"
-        >
+        <button type="button" class="btn mt-4" (click)="retryCatalog()">
           Retry loading movies
         </button>
       } @else {
