@@ -33,7 +33,9 @@ export class MovieListComponent {
 
   protected readonly movieService = inject(MovieService);
 
-  protected readonly searchQuery = signal('');
+  private readonly catalogQuery = signal({ query: '', page: 1 });
+
+  protected readonly searchQuery = computed(() => this.catalogQuery().query);
   protected readonly desktopPages = computed(() => this.getPageNumbers(5));
   protected readonly mobilePages = computed(() => this.getPageNumbers(3));
 
@@ -63,18 +65,23 @@ export class MovieListComponent {
         takeUntilDestroyed(),
       )
       .subscribe(({ query, page }) => {
-        this.searchQuery.set(query);
-
-        if (query) {
-          this.movieService.searchMovies(query, page);
-        } else {
-          this.movieService.getPopularMovies(page);
-        }
+        this.catalogQuery.set({ query, page });
+        this.loadCatalog(query, page);
       });
   }
 
   protected onSearch(keyword: string): void {
     const query = keyword.trim();
+    const currentQuery = this.catalogQuery();
+
+    if (
+      this.movieService.error() &&
+      query === currentQuery.query &&
+      currentQuery.page === 1
+    ) {
+      this.loadCatalog(query, 1);
+      return;
+    }
 
     void this.router.navigate([], {
       relativeTo: this.route,
@@ -104,6 +111,14 @@ export class MovieListComponent {
       },
       queryParamsHandling: 'merge',
     });
+  }
+
+  private loadCatalog(query: string, page: number): void {
+    if (query) {
+      this.movieService.searchMovies(query, page);
+    } else {
+      this.movieService.getPopularMovies(page);
+    }
   }
 
   private getPageNumbers(limit: number): number[] {

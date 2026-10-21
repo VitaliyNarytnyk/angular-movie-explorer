@@ -148,4 +148,38 @@ describe('MovieListComponent', () => {
       }
     },
   );
+
+  it.each([1, 2])(
+    'retries the failed search from page %i on submission',
+    async (page) => {
+      const router = TestBed.inject(Router);
+      const keyword = 'The Green Mile';
+
+      await router.navigate([], {
+        queryParams: {
+          query: keyword,
+          page: page === 1 ? null : page,
+        },
+      });
+      await fixture.whenStable();
+
+      error.set('Unable to load movies. Please try again.');
+      searchMovies.mockClear();
+      getPopularMovies.mockClear();
+      fixture.detectChanges();
+
+      const searchComponent = fixture.debugElement.query(
+        By.directive(MovieSearchComponent),
+      ).componentInstance as MovieSearchComponent;
+
+      searchComponent.searchRequested.emit(keyword);
+      await fixture.whenStable();
+
+      expect(router.parseUrl(router.url).queryParams).toEqual({
+        query: keyword,
+      });
+      expect(searchMovies).toHaveBeenCalledExactlyOnceWith(keyword, 1);
+      expect(getPopularMovies).not.toHaveBeenCalled();
+    },
+  );
 });
