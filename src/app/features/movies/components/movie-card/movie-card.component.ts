@@ -1,7 +1,8 @@
 import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Movie } from '../../models/movie.model';
+import type { Movie } from '@features/movies/models/movie.model';
+import { getMoviePosterUrl } from '@features/movies/utils/movie-poster.util';
 
 @Component({
   imports: [RouterLink, NgOptimizedImage],
@@ -13,9 +14,7 @@ export class MovieCardComponent {
   readonly movie = input.required<Movie>();
   readonly priority = input(false);
 
-  protected readonly posterUrl = computed(() => {
-    const path = this.movie().poster_path;
-
-    return path ? `https://image.tmdb.org/t/p/w500${path}` : null;
-  });
+  protected readonly posterUrl = computed(() =>
+    getMoviePosterUrl(this.movie().poster_path),
+  );
 }

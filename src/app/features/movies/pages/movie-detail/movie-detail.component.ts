@@ -8,11 +8,12 @@ import {
   viewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { MovieService } from '../../services/movie.service';
+import { MovieService } from '@features/movies/services/movie.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, map } from 'rxjs';
 import { DatePipe, DecimalPipe, NgOptimizedImage } from '@angular/common';
 import { LoadingIndicatorComponent } from '@shared/components/loading-indicator/loading-indicator.component';
+import { getMoviePosterUrl } from '@features/movies/utils/movie-poster.util';
 
 @Component({
   imports: [
@@ -35,11 +36,9 @@ export class MovieDetailComponent {
   protected readonly movieService = inject(MovieService);
   protected readonly invalidId = signal(false);
 
-  protected readonly posterUrl = computed(() => {
-    const path = this.movieService.movieDetails()?.poster_path;
-
-    return path ? `https://image.tmdb.org/t/p/w500${path}` : null;
-  });
+  protected readonly posterUrl = computed(() =>
+    getMoviePosterUrl(this.movieService.movieDetails()?.poster_path),
+  );
 
   constructor() {
     if (this.router.lastSuccessfulNavigation() !== null) {
