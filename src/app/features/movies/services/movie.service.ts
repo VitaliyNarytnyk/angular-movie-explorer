@@ -1,8 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service, signal } from '@angular/core';
-import { Movie } from '../models/movie.model';
-import { MovieListResponse } from '../models/movie-list-response.model';
-import { environment } from '@env/environment.local';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   catchError,
   EMPTY,
@@ -11,24 +9,30 @@ import {
   Subject,
   switchMap,
 } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MovieDetails } from '../models/movie-details.model';
+import type { Movie } from '@features/movies/models/movie.model';
+import type { MovieDetails } from '@features/movies/models/movie-details.model';
+import type { MovieListResponse } from '@features/movies/models/movie-list-response.model';
+import { MAX_MOVIE_PAGES } from '@features/movies/constants/movie.constants';
+import { environment } from '@env/environment.local';
 
 @Service()
 export class MovieService {
   private readonly http = inject(HttpClient);
+  private readonly headers = {
+    Authorization: `Bearer ${environment.tmdbReadAccessToken}`,
+  };
   private readonly movieQueries = new Subject<{
     query: string;
     page: number;
   }>();
-  private readonly moviesIds = new Subject<number>();
+  private readonly movieIds = new Subject<number>();
 
   private readonly movieState = signal<Movie[]>([]);
   private readonly loadingState = signal(false);
   private readonly catalogInitializedState = signal(false);
   private readonly errorState = signal<string | null>(null);
   private readonly currentPageState = signal(1);
-  private readonly totalPageState = signal(0);
+  private readonly totalPagesState = signal(0);
 
   private readonly detailsState = signal<MovieDetails | null>(null);
   private readonly detailsLoadingState = signal(false);
@@ -39,7 +43,7 @@ export class MovieService {
   readonly catalogInitialized = this.catalogInitializedState.asReadonly();
   readonly error = this.errorState.asReadonly();
   readonly currentPage = this.currentPageState.asReadonly();
-  readonly totalPages = this.totalPageState.asReadonly();
+  readonly totalPages = this.totalPagesState.asReadonly();
 
   readonly movieDetails = this.detailsState.asReadonly();
   readonly detailsLoading = this.detailsLoadingState.asReadonly();
@@ -54,11 +58,13 @@ export class MovieService {
       .subscribe((response) => {
         this.movieState.set(response.results);
         this.currentPageState.set(response.page);
-        this.totalPageState.set(Math.min(response.total_pages, 500));
+        this.totalPagesState.set(
+          Math.min(response.total_pages, MAX_MOVIE_PAGES),
+        );
         this.catalogInitializedState.set(true);
       });
 
-    this.moviesIds
+    this.movieIds
       .pipe(
         switchMap((id) => this.loadMovieDetails(id)),
         takeUntilDestroyed(),
@@ -83,7 +89,7 @@ export class MovieService {
   }
 
   getMovieDetails(id: number): void {
-    this.moviesIds.next(id);
+    this.movieIds.next(id);
   }
 
   private loadMovies(query: string, page = 1): Observable<MovieListResponse> {
@@ -97,9 +103,7 @@ export class MovieService {
 
     return this.http
       .get<MovieListResponse>(`${environment.tmdbApiUrl}${endpoint}`, {
-        headers: {
-          Authorization: `Bearer ${environment.tmdbReadAccessToken}`,
-        },
+        headers: this.headers,
         params,
       })
       .pipe(
@@ -122,9 +126,7 @@ export class MovieService {
 
     return this.http
       .get<MovieDetails>(`${environment.tmdbApiUrl}/movie/${id}`, {
-        headers: {
-          Authorization: `Bearer ${environment.tmdbReadAccessToken}`,
-        },
+        headers: this.headers,
       })
       .pipe(
         catchError(() => {

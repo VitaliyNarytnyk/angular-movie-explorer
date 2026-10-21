@@ -14,6 +14,7 @@ import { MovieService } from '../../services/movie.service';
 import { distinctUntilChanged, map } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadingIndicatorComponent } from '@shared/components/loading-indicator/loading-indicator.component';
+import { MAX_MOVIE_PAGES } from '@features/movies/constants/movie.constants';
 
 @Component({
   imports: [
@@ -55,7 +56,10 @@ export class MovieListComponent {
 
           return {
             query: (params.get('query') ?? '').trim(),
-            page: Number.isInteger(page) && page >= 1 && page <= 500 ? page : 1,
+            page:
+              Number.isInteger(page) && page >= 1 && page <= MAX_MOVIE_PAGES
+                ? page
+                : 1,
           };
         }),
         distinctUntilChanged(
