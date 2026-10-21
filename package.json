@@ -25,6 +25,9 @@
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
+  "imports": {
+    "#styles": "./src/styles.css"
+  },
   "devDependencies": {
     "@angular/build": "^22.2.3",
     "@angular/cli": "^22.2.3",

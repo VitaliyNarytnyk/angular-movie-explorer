@@ -1,0 +1,71 @@
+<nav
+  aria-label="Pagination"
+  class="mt-8 flex flex-wrap items-center justify-center gap-2"
+>
+  <button
+    type="button"
+    aria-label="Previous page"
+    [disabled]="disabled() || currentPage() <= 1"
+    (click)="pageChanged.emit(currentPage() - 1)"
+    class="pagination-button inline-flex items-center justify-center px-3"
+  >
+    <svg
+      class="size-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="m12 19-7-7 7-7M5 12h14" />
+    </svg>
+  </button>
+
+  @for (page of desktopPages(); track page) {
+    <button
+      type="button"
+      [attr.aria-label]="'Go to page ' + page"
+      [attr.aria-current]="page === currentPage() ? 'page' : null"
+      [disabled]="disabled()"
+      [class.hidden]="!mobilePages().includes(page)"
+      (click)="pageChanged.emit(page)"
+      class="pagination-button px-2 font-medium tabular-nums sm:inline-block"
+    >
+      {{ page }}
+    </button>
+  }
+
+  <button
+    type="button"
+    aria-label="Next page"
+    [disabled]="disabled() || currentPage() >= totalPages()"
+    (click)="pageChanged.emit(currentPage() + 1)"
+    class="pagination-button inline-flex items-center justify-center px-3"
+  >
+    <svg
+      class="size-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="m12 5 7 7-7 7M5 12h14" />
+    </svg>
+  </button>
+
+  <span
+    aria-live="polite"
+    aria-atomic="true"
+    class="order-last basis-full text-center text-sm text-muted"
+  >
+    Page {{ currentPage() }} of
+    {{ totalPages() }}
+  </span>
+</nav>

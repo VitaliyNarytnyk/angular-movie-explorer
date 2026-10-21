@@ -8,19 +8,21 @@ import {
   viewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MovieCardComponent } from '../../components/movie-card/movie-card.component';
-import { MovieSearchComponent } from '../../components/movie-search/movie-search.component';
-import { MovieService } from '../../services/movie.service';
+import { MovieCardComponent } from '@features/movies/components/movie-card/movie-card.component';
+import { MovieSearchComponent } from '@features/movies/components/movie-search/movie-search.component';
+import { MovieService } from '@features/movies/services/movie.service';
 import { distinctUntilChanged, map } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadingIndicatorComponent } from '@shared/components/loading-indicator/loading-indicator.component';
 import { MAX_MOVIE_PAGES } from '@features/movies/constants/movie.constants';
+import { PaginationComponent } from '@shared/components/pagination/pagination.component';
 
 @Component({
   imports: [
     MovieCardComponent,
     MovieSearchComponent,
     LoadingIndicatorComponent,
+    PaginationComponent,
   ],
   selector: 'app-movie-list',
   styleUrl: './movie-list.component.css',
@@ -37,8 +39,6 @@ export class MovieListComponent {
   private readonly catalogQuery = signal({ query: '', page: 1 });
 
   protected readonly searchQuery = computed(() => this.catalogQuery().query);
-  protected readonly desktopPages = computed(() => this.getPageNumbers(5));
-  protected readonly mobilePages = computed(() => this.getPageNumbers(3));
 
   constructor() {
     if (this.router.lastSuccessfulNavigation() !== null) {
@@ -123,18 +123,5 @@ export class MovieListComponent {
     } else {
       this.movieService.getPopularMovies(page);
     }
-  }
-
-  private getPageNumbers(limit: number): number[] {
-    const current = this.movieService.currentPage();
-    const total = this.movieService.totalPages();
-    const count = Math.min(limit, total);
-
-    const start = Math.max(
-      1,
-      Math.min(current - Math.floor(count / 2), total - count + 1),
-    );
-
-    return Array.from({ length: count }, (_, index) => start + index);
   }
 }
