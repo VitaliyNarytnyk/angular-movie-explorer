@@ -34,6 +34,19 @@ export class MovieFiltersComponent {
   readonly filtersApplied = output<MovieFilters>();
   readonly genresRetryRequested = output<void>();
   protected readonly sortFields = MOVIE_SORT_FIELDS;
+  protected readonly hasCustomSort = computed(
+    () => this.filters().sortBy !== DEFAULT_MOVIE_FILTERS.sortBy,
+  );
+  protected readonly hasActiveFilters = computed(() => {
+    const { genreIds, yearFrom, yearTo, minRating, minVotes } = this.filters();
+    return (
+      genreIds.length > 0 ||
+      yearFrom !== null ||
+      yearTo !== null ||
+      (minRating ?? 0) > 0 ||
+      (minVotes ?? 0) > 0
+    );
+  });
   protected readonly votesMaximum = computed(() =>
     Math.max(1000, this.filters().minVotes ?? 0),
   );
@@ -92,7 +105,7 @@ export class MovieFiltersComponent {
     validate(fields.minVotes, ({ value }) => {
       const current = value();
 
-      return current !== null && !Number.isInteger(current)
+      return !Number.isInteger(current)
         ? {
             kind: 'integer',
             message: 'Enter a whole number.',

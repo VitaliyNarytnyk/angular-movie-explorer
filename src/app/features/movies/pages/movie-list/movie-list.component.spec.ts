@@ -312,4 +312,56 @@ describe('MovieListComponent', () => {
     expect(router.parseUrl(router.url).queryParams).toEqual({});
     expect(getPopularMovies).toHaveBeenLastCalledWith(1);
   });
+  it('restores each mode after switching and recreating the catalog page', async () => {
+    const router = TestBed.inject(Router);
+    const searchParams = { query: 'Green', page: '2' };
+    const discoverParams = {
+      mode: 'discover',
+      genres: '18',
+      from: '1999',
+      rating: '7',
+      sort: 'vote_average.desc',
+      page: '3',
+    };
+    const switchMode = async (label: string) => {
+      Array.from(element.querySelectorAll('button'))
+        .find((button) => button.textContent?.trim() === label)
+        ?.click();
+      await fixture.whenStable();
+    };
+
+    await router.navigate([], { queryParams: searchParams });
+    await fixture.whenStable();
+    await switchMode('Discover movies');
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      mode: 'discover',
+    });
+
+    await router.navigate([], { queryParams: discoverParams });
+    await fixture.whenStable();
+    fixture.destroy();
+    fixture = TestBed.createComponent(MovieListComponent);
+    element = fixture.nativeElement as HTMLElement;
+    await fixture.whenStable();
+
+    await switchMode('Search by title');
+    expect(router.parseUrl(router.url).queryParams).toEqual(searchParams);
+    expect(searchMovies).toHaveBeenLastCalledWith('Green', 2);
+    expect(
+      element.querySelector<HTMLInputElement>('input[type="search"]')?.value,
+    ).toBe('Green');
+
+    await switchMode('Discover movies');
+    expect(router.parseUrl(router.url).queryParams).toEqual(discoverParams);
+    expect(discoverMovies).toHaveBeenLastCalledWith(
+      {
+        ...DEFAULT_MOVIE_FILTERS,
+        genreIds: [18],
+        yearFrom: 1999,
+        minRating: 7,
+        sortBy: 'vote_average.desc',
+      },
+      3,
+    );
+  });
 });

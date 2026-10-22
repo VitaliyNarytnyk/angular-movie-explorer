@@ -52,11 +52,18 @@ src/app/
     components/
       loading-indicator/
       pagination/
+      carousel/
+      brand-link/
   app.routes.ts
 ```
 
-Movie models and `MovieService` belong to `features/movies`, alongside the pages
-and components that use them. Pages coordinate data loading and page state;
+Movie models and services belong to `features/movies`, alongside the pages
+and components that use them. `MovieApiService` builds typed HTTP requests and
+owns TMDb URLs, authorization headers, and API parameters. `MovieService` owns
+the signal state, request cancellation, loading and error handling, and genre cache.
+Its public methods remain the entry point for pages.
+
+Pages coordinate data loading and page state;
 the card, search, filter, and pagination components receive data and communicate through inputs and
 outputs.
 
@@ -83,7 +90,12 @@ legacy filter parameters are ignored in title search.
 
 Filters are edited as a draft and applied on submission. Applying or resetting
 filters starts at page one. The URL is the source of truth for applied settings;
-invalid query parameters fall back to safe defaults. For example:
+invalid query parameters fall back to safe defaults. Each browsing mode remembers
+its last applied query, filters, sort order, and page in memory. Switching modes
+restores those settings in the URL, including after visiting movie details. This
+is not a results cache: returning to a mode loads fresh data. Reloading the app
+restores the active mode from the URL; the other mode's in-memory settings reset.
+Unapplied filter drafts are not saved between modes. For example:
 
 ```text
 /movies?query=The%20Green%20Mile
@@ -96,9 +108,10 @@ Sorting is performed by TMDb before pagination. Alphabetic sorting uses
 `original_title.asc` / `original_title.desc`; translated titles displayed on cards
 can therefore appear out of order.
 
-Sort and Filters are independent collapsible panels, both initially closed on all
-screen sizes. They share the Apply and Reset actions, and collapsing a panel
-preserves its draft values. Genres use toggle buttons; rating and vote minimums
+Sort and Filters are independent collapsible panels. They start closed with default
+settings; applied filters and a non-default sort order expand their respective panels,
+including when returning to Discover. They share the Apply and Reset actions,
+and collapsing a panel preserves its draft values. Genres use toggle buttons; rating and vote minimums
 use sliders, where zero removes the minimum. Thin dividers separate filter groups.
 Invalid filter submissions expand the Filters panel to show the validation message.
 

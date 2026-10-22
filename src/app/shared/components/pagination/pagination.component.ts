@@ -1,7 +1,6 @@
 import { Component, computed, input, output } from '@angular/core';
 
 @Component({
-  imports: [],
   selector: 'app-pagination',
   templateUrl: './pagination.component.html',
 })

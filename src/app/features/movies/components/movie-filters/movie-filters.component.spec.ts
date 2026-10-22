@@ -205,4 +205,34 @@ describe('MovieFiltersComponent', () => {
     ).toBe('1999');
     expect(applied).not.toHaveBeenCalled();
   });
+  it('expands only panels with applied settings that differ from the defaults', async () => {
+    const [sortPanel, filtersPanel] = element.querySelectorAll('details');
+    expect(sortPanel.open).toBe(false);
+    expect(filtersPanel.open).toBe(false);
+
+    fixture.componentRef.setInput('filters', {
+      ...DEFAULT_MOVIE_FILTERS,
+      genreIds: [18],
+    });
+    await fixture.whenStable();
+    expect(sortPanel.open).toBe(false);
+    expect(filtersPanel.open).toBe(true);
+
+    fixture.componentRef.setInput('filters', {
+      ...DEFAULT_MOVIE_FILTERS,
+      sortBy: 'vote_average.desc',
+    });
+    await fixture.whenStable();
+    expect(sortPanel.open).toBe(true);
+    expect(filtersPanel.open).toBe(false);
+
+    fixture.componentRef.setInput('filters', {
+      ...DEFAULT_MOVIE_FILTERS,
+      genreIds: [18],
+      sortBy: 'vote_average.desc',
+    });
+    await fixture.whenStable();
+    expect(sortPanel.open).toBe(true);
+    expect(filtersPanel.open).toBe(true);
+  });
 });

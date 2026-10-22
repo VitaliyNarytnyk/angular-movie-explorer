@@ -45,7 +45,7 @@ export class CarouselComponent {
     );
   }
 
-  protected scroll(direction: number): void {
+  protected scroll(direction: -1 | 1): void {
     const element = this.viewport().nativeElement;
     element.scrollBy({
       left: direction * element.clientWidth * 0.85,

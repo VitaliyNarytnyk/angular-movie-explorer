@@ -45,6 +45,7 @@ export class MovieSearchComponent {
 
     merge(this.searchRequests, urlQueries)
       .pipe(
+        // Submissions can retry; URL updates must cancel pending typing.
         distinctUntilChanged(
           (previous, current) =>
             current.source === 'input' && previous.keyword === current.keyword,
@@ -54,9 +55,11 @@ export class MovieSearchComponent {
             return EMPTY;
           }
 
-          return source === 'submit' || keyword === ''
-            ? of(keyword)
-            : timer(300).pipe(map(() => keyword));
+          if (source === 'submit' || keyword === '') {
+            return of(keyword);
+          }
+
+          return timer(300).pipe(map(() => keyword));
         }),
         takeUntilDestroyed(),
       )

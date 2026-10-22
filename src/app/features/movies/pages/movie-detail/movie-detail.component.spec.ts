@@ -154,10 +154,15 @@ describe('MovieDetailComponent', () => {
     expect(element.querySelector('a')?.getAttribute('href')).toBe('/movies');
   });
 
-  it('recreates images when another movie replaces the current details', () => {
+  it('hides previous images until the replacement images finish loading', () => {
     movieDetails.set({ ...movie, backdrop_path: '/green-mile-backdrop.jpg' });
     fixture.detectChanges();
-    const previousImages = [...element.querySelectorAll('img')];
+    const images = [...element.querySelectorAll('img')];
+    images.forEach((image) => image.dispatchEvent(new Event('load')));
+    fixture.detectChanges();
+    expect(
+      images.every((image) => !image.classList.contains('invisible')),
+    ).toBe(true);
 
     movieDetails.set({
       ...movie,
@@ -168,10 +173,15 @@ describe('MovieDetailComponent', () => {
     });
     fixture.detectChanges();
 
-    expect(previousImages).toHaveLength(2);
-    expect(previousImages.every((image) => !element.contains(image))).toBe(
+    expect(images).toHaveLength(2);
+    expect(images.every((image) => image.classList.contains('invisible'))).toBe(
       true,
     );
+    images.forEach((image) => image.dispatchEvent(new Event('load')));
+    fixture.detectChanges();
+    expect(
+      images.every((image) => !image.classList.contains('invisible')),
+    ).toBe(true);
     expect(
       element
         .querySelector('img[alt="The Truman Show poster"]')

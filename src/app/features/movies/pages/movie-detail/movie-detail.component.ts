@@ -39,6 +39,8 @@ export class MovieDetailComponent {
 
   protected readonly movieService = inject(MovieService);
   protected readonly invalidId = signal(false);
+  private readonly headingFocusPending = signal(false);
+  protected readonly loadedImages = signal({ poster: '', backdrop: '' });
 
   protected readonly posterUrl = computed(() =>
     getMovieImageUrl(this.movieService.movieDetails()?.poster_path),
@@ -61,37 +63,40 @@ export class MovieDetailComponent {
       .join(', '),
   );
 
-  protected retrySimilarMovies(): void {
-    const movie = this.movieService.movieDetails();
-    if (movie && !this.movieService.similarLoading())
-      this.movieService.getSimilarMovies(movie.id);
+  constructor() {
+    this.setupHeadingFocus();
+    this.subscribeToMovieId();
   }
 
-  constructor() {
-    const focusOnEntry = this.router.lastSuccessfulNavigation() !== null;
-    let displayedMovieId: number | null = null;
+  protected retrySimilarMovies(): void {
+    const movie = this.movieService.movieDetails();
+    if (movie && !this.movieService.similarLoading()) {
+      this.movieService.getSimilarMovies(movie.id);
+    }
+  }
 
+  protected onImageLoad(kind: 'poster' | 'backdrop', event: Event): void {
+    const image = event.target as HTMLImageElement;
+    this.loadedImages.update((images) => ({
+      ...images,
+      [kind]: image.currentSrc || image.src,
+    }));
+  }
+
+  private setupHeadingFocus(): void {
     afterRenderEffect({
       write: () => {
-        const movie = this.movieService.movieDetails();
-        if (
-          !movie ||
-          this.movieService.detailsLoading() ||
-          this.movieService.detailsError() ||
-          this.invalidId()
-        )
+        if (!this.headingFocusPending() || this.movieService.detailsLoading()) {
           return;
-
-        if (
-          movie.id !== displayedMovieId &&
-          (displayedMovieId !== null || focusOnEntry)
-        ) {
-          this.pageHeading()?.nativeElement.focus();
         }
-        displayedMovieId = movie.id;
+
+        this.pageHeading()?.nativeElement.focus();
+        this.headingFocusPending.set(false);
       },
     });
+  }
 
+  private subscribeToMovieId(): void {
     this.route.paramMap
       .pipe(
         map((params) => Number(params.get('id'))),
@@ -102,6 +107,9 @@ export class MovieDetailComponent {
         const valid = Number.isSafeInteger(id) && id > 0;
 
         this.invalidId.set(!valid);
+        this.headingFocusPending.set(
+          this.router.lastSuccessfulNavigation() !== null,
+        );
 
         if (valid) {
           this.movieService.getMovieDetails(id);

@@ -1,5 +1,5 @@
 <form novalidate class="space-y-3" (submit)="onSubmit($event)">
-  <details class="filter-panel">
+  <details class="filter-panel" [open]="hasCustomSort()">
     <summary class="filter-panel-heading">
       <h3>Sort</h3>
     </summary>
@@ -62,7 +62,7 @@
     </div>
   </details>
 
-  <details #filtersPanel class="filter-panel">
+  <details #filtersPanel class="filter-panel" [open]="hasActiveFilters()">
     <summary class="filter-panel-heading">
       <h3>Filters</h3>
     </summary>
@@ -147,11 +147,11 @@
                 !filtersForm.yearFrom().invalid()
               "
             >
-              @if (
-                filtersForm.yearFrom().touched() &&
-                filtersForm.yearFrom().invalid()
+              @for (
+                error of filtersForm.yearFrom().errors();
+                track error.kind
               ) {
-                Select a release year.
+                <span class="block">{{ error.message }}</span>
               }
             </p>
           </div>
@@ -186,10 +186,8 @@
                 !filtersForm.yearTo().invalid()
               "
             >
-              @if (
-                filtersForm.yearTo().touched() && filtersForm.yearTo().invalid()
-              ) {
-                The end year must be the same as or later than the start year.
+              @for (error of filtersForm.yearTo().errors(); track error.kind) {
+                <span class="block">{{ error.message }}</span>
               }
             </p>
           </div>

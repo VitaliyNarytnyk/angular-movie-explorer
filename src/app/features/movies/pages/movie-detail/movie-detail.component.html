@@ -41,201 +41,202 @@
   } @else if (movieService.detailsError(); as error) {
     <p role="alert">{{ error }}</p>
   } @else if (movieService.movieDetails(); as movie) {
-    <!-- Reset images and carousel positions when navigating to another movie. -->
-    @for (currentMovie of [movie]; track currentMovie.id) {
-      <article aria-labelledby="movie-title" class="movie-hero">
-        @if (backdropUrl(); as backdrop) {
-          <img
-            [ngSrc]="backdrop"
-            fill
-            priority
-            sizes="100vw"
-            alt=""
-            class="movie-hero-backdrop"
-          />
-        }
-        <div class="movie-hero-content">
-          <div>
-            @if (posterUrl(); as poster) {
-              <img
-                [ngSrc]="poster"
-                [alt]="movie.title + ' poster'"
-                width="500"
-                height="750"
-                priority
-                class="movie-hero-poster aspect-2/3 w-full rounded-xl bg-surface object-contain"
-              />
-            } @else {
-              <div
-                class="movie-hero-poster flex aspect-2/3 w-full items-center justify-center rounded-xl bg-surface-raised text-muted"
-              >
-                No poster available
-              </div>
-            }
-          </div>
-
-          <div>
-            <h3 id="movie-title" class="text-3xl font-bold">
-              {{ movie.title }}
-            </h3>
-
-            @if (movie.original_title && movie.original_title !== movie.title) {
-              <p class="mt-2 text-sm text-muted">
-                Original title: {{ movie.original_title }}
-              </p>
-            }
-            @if (movie.tagline) {
-              <p class="mt-3 text-lg italic text-muted">{{ movie.tagline }}</p>
-            }
-
-            <p class="mt-4 leading-7 text-muted">
-              {{ movie.overview || 'No description available.' }}
-            </p>
-
-            <dl class="movie-facts mt-6 grid gap-6 sm:grid-cols-2">
-              <div>
-                <dt class="text-sm text-muted">Rating</dt>
-                <dd class="mt-1">
-                  @if (movie.vote_count > 0) {
-                    {{ movie.vote_average | number: '1.1-1' }} / 10
-                    <span class="block text-sm text-muted"
-                      >{{ movie.vote_count | number }} votes</span
-                    >
-                  } @else {
-                    No ratings yet
-                  }
-                </dd>
-              </div>
-
-              <div>
-                <dt class="text-sm text-muted">Release date</dt>
-                <dd class="mt-1">
-                  @if (movie.release_date) {
-                    <time [attr.datetime]="movie.release_date">
-                      {{ movie.release_date | date: 'longDate' }}
-                    </time>
-                  } @else {
-                    Release date unavailable
-                  }
-                </dd>
-              </div>
-
-              @if (movie.runtime && movie.runtime > 0) {
-                <div>
-                  <dt class="text-sm text-muted">Runtime</dt>
-                  <dd class="mt-1">{{ movie.runtime }} min</dd>
-                </div>
-              }
-              @if (movie.status) {
-                <div>
-                  <dt class="text-sm text-muted">Status</dt>
-                  <dd class="mt-1">{{ movie.status }}</dd>
-                </div>
-              }
-              @if (movie.original_language) {
-                <div>
-                  <dt class="text-sm text-muted">Original language</dt>
-                  <dd class="mt-1 uppercase">{{ movie.original_language }}</dd>
-                </div>
-              }
-              @if (directors()) {
-                <div>
-                  <dt class="text-sm text-muted">Director</dt>
-                  <dd class="mt-1">{{ directors() }}</dd>
-                </div>
-              }
-
-              <div class="sm:col-span-2">
-                <dt class="text-sm text-muted">Genres</dt>
-                <dd class="mt-2">
-                  <ul class="flex flex-wrap gap-2">
-                    @for (genre of movie.genres; track genre.id) {
-                      <li
-                        class="rounded-full bg-surface-raised px-3 py-1 text-sm"
-                      >
-                        {{ genre.name }}
-                      </li>
-                    } @empty {
-                      <li>No genres available.</li>
-                    }
-                  </ul>
-                </dd>
-              </div>
-            </dl>
-          </div>
+    <article aria-labelledby="movie-title" class="movie-hero">
+      @if (backdropUrl(); as backdrop) {
+        <img
+          [ngSrc]="backdrop"
+          [class.invisible]="loadedImages().backdrop !== backdrop"
+          (load)="onImageLoad('backdrop', $event)"
+          fill
+          priority
+          sizes="100vw"
+          alt=""
+          class="movie-hero-backdrop"
+        />
+      }
+      <div class="movie-hero-content">
+        <div>
+          @if (posterUrl(); as poster) {
+            <img
+              [ngSrc]="poster"
+              [class.invisible]="loadedImages().poster !== poster"
+              (load)="onImageLoad('poster', $event)"
+              [alt]="movie.title + ' poster'"
+              width="500"
+              height="750"
+              priority
+              class="movie-hero-poster aspect-2/3 w-full rounded-xl bg-surface object-contain"
+            />
+          } @else {
+            <div
+              class="movie-hero-poster flex aspect-2/3 w-full items-center justify-center rounded-xl bg-surface-raised text-muted"
+            >
+              No poster available
+            </div>
+          }
         </div>
-      </article>
 
-      <section aria-labelledby="cast-heading" class="mt-12">
-        @if (cast().length) {
-          <app-carousel label="cast" heading="Cast" headingId="cast-heading">
-            <ul class="cast-list">
-              @for (person of cast(); track person.credit_id) {
-                <li>
-                  @if (person.photoUrl; as photo) {
-                    <img
-                      [ngSrc]="photo"
-                      width="185"
-                      height="278"
-                      alt=""
-                      class="aspect-2/3 w-full rounded-lg object-cover"
-                    />
-                  } @else {
-                    <div
-                      class="flex aspect-2/3 items-center justify-center rounded-lg bg-surface-raised p-3 text-center text-sm text-muted"
-                    >
-                      Photo unavailable
-                    </div>
-                  }
-                  <p class="mt-3 text-sm font-semibold">{{ person.name }}</p>
-                  <p class="mt-1 text-sm text-muted">{{ person.character }}</p>
-                </li>
-              }
-            </ul>
-          </app-carousel>
-        } @else {
-          <h3 id="cast-heading" class="mb-6 text-2xl font-semibold">Cast</h3>
-          <p class="text-muted">No cast information available.</p>
-        }
-      </section>
-
-      <section aria-labelledby="similar-heading" class="mt-12">
-        @if (
-          movieService.similarLoading() ||
-          movieService.similarError() ||
-          !movieService.similarMovies().length
-        ) {
-          <h3 id="similar-heading" class="mb-6 text-2xl font-semibold">
-            Similar movies
+        <div>
+          <h3 id="movie-title" class="text-3xl font-bold">
+            {{ movie.title }}
           </h3>
-        }
-        @if (movieService.similarLoading()) {
-          <app-loading-indicator
-            [fullscreen]="false"
-            message="Loading similar movies..."
-          />
-        } @else if (movieService.similarError(); as error) {
-          <p role="alert">{{ error }}</p>
-          <button type="button" (click)="retrySimilarMovies()" class="btn mt-4">
-            Retry loading similar movies
-          </button>
-        } @else if (movieService.similarMovies().length) {
-          <app-carousel
-            label="similar movies"
-            heading="Similar movies"
-            headingId="similar-heading"
-          >
-            <ul class="similar-list">
-              @for (similar of movieService.similarMovies(); track similar.id) {
-                <li><app-movie-card [movie]="similar" /></li>
-              }
-            </ul>
-          </app-carousel>
-        } @else {
-          <p class="text-muted">No similar movies available.</p>
-        }
-      </section>
-    }
+
+          @if (movie.original_title && movie.original_title !== movie.title) {
+            <p class="mt-2 text-sm text-muted">
+              Original title: {{ movie.original_title }}
+            </p>
+          }
+          @if (movie.tagline) {
+            <p class="mt-3 text-lg italic text-muted">{{ movie.tagline }}</p>
+          }
+
+          <p class="mt-4 leading-7 text-muted">
+            {{ movie.overview || 'No description available.' }}
+          </p>
+
+          <dl class="movie-facts mt-6 grid gap-6 sm:grid-cols-2">
+            <div>
+              <dt class="text-sm text-muted">Rating</dt>
+              <dd class="mt-1">
+                @if (movie.vote_count > 0) {
+                  {{ movie.vote_average | number: '1.1-1' }} / 10
+                  <span class="block text-sm text-muted"
+                    >{{ movie.vote_count | number }} votes</span
+                  >
+                } @else {
+                  No ratings yet
+                }
+              </dd>
+            </div>
+
+            <div>
+              <dt class="text-sm text-muted">Release date</dt>
+              <dd class="mt-1">
+                @if (movie.release_date) {
+                  <time [attr.datetime]="movie.release_date">
+                    {{ movie.release_date | date: 'longDate' }}
+                  </time>
+                } @else {
+                  Release date unavailable
+                }
+              </dd>
+            </div>
+
+            @if (movie.runtime && movie.runtime > 0) {
+              <div>
+                <dt class="text-sm text-muted">Runtime</dt>
+                <dd class="mt-1">{{ movie.runtime }} min</dd>
+              </div>
+            }
+            @if (movie.status) {
+              <div>
+                <dt class="text-sm text-muted">Status</dt>
+                <dd class="mt-1">{{ movie.status }}</dd>
+              </div>
+            }
+            @if (movie.original_language) {
+              <div>
+                <dt class="text-sm text-muted">Original language</dt>
+                <dd class="mt-1 uppercase">{{ movie.original_language }}</dd>
+              </div>
+            }
+            @if (directors()) {
+              <div>
+                <dt class="text-sm text-muted">Director</dt>
+                <dd class="mt-1">{{ directors() }}</dd>
+              </div>
+            }
+
+            <div class="sm:col-span-2">
+              <dt class="text-sm text-muted">Genres</dt>
+              <dd class="mt-2">
+                <ul class="flex flex-wrap gap-2">
+                  @for (genre of movie.genres; track genre.id) {
+                    <li
+                      class="rounded-full bg-surface-raised px-3 py-1 text-sm"
+                    >
+                      {{ genre.name }}
+                    </li>
+                  } @empty {
+                    <li>No genres available.</li>
+                  }
+                </ul>
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </article>
+
+    <section aria-labelledby="cast-heading" class="mt-12">
+      @if (cast().length) {
+        <app-carousel label="cast" heading="Cast" headingId="cast-heading">
+          <ul class="cast-list">
+            @for (person of cast(); track person.credit_id) {
+              <li>
+                @if (person.photoUrl; as photo) {
+                  <img
+                    [ngSrc]="photo"
+                    width="185"
+                    height="278"
+                    alt=""
+                    class="aspect-2/3 w-full rounded-lg object-cover"
+                  />
+                } @else {
+                  <div
+                    class="flex aspect-2/3 items-center justify-center rounded-lg bg-surface-raised p-3 text-center text-sm text-muted"
+                  >
+                    Photo unavailable
+                  </div>
+                }
+                <p class="mt-3 text-sm font-semibold">{{ person.name }}</p>
+                <p class="mt-1 text-sm text-muted">{{ person.character }}</p>
+              </li>
+            }
+          </ul>
+        </app-carousel>
+      } @else {
+        <h3 id="cast-heading" class="mb-6 text-2xl font-semibold">Cast</h3>
+        <p class="text-muted">No cast information available.</p>
+      }
+    </section>
+
+    <section aria-labelledby="similar-heading" class="mt-12">
+      @if (
+        movieService.similarLoading() ||
+        movieService.similarError() ||
+        !movieService.similarMovies().length
+      ) {
+        <h3 id="similar-heading" class="mb-6 text-2xl font-semibold">
+          Similar movies
+        </h3>
+      }
+      @if (movieService.similarLoading()) {
+        <app-loading-indicator
+          [fullscreen]="false"
+          message="Loading similar movies..."
+        />
+      } @else if (movieService.similarError(); as error) {
+        <p role="alert">{{ error }}</p>
+        <button type="button" (click)="retrySimilarMovies()" class="btn mt-4">
+          Retry loading similar movies
+        </button>
+      } @else if (movieService.similarMovies().length) {
+        <app-carousel
+          label="similar movies"
+          heading="Similar movies"
+          headingId="similar-heading"
+        >
+          <ul class="similar-list">
+            @for (similar of movieService.similarMovies(); track similar.id) {
+              <li><app-movie-card [movie]="similar" /></li>
+            }
+          </ul>
+        </app-carousel>
+      } @else {
+        <p class="text-muted">No similar movies available.</p>
+      }
+    </section>
   } @else {
     <p>No movie details available.</p>
   }

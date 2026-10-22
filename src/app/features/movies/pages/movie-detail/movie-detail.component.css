@@ -29,22 +29,13 @@
   isolation: isolate;
   overflow: hidden;
   border-radius: 1rem;
-  background: var(--surface-bg);
+  background: var(--page-bg);
 }
 .movie-hero-backdrop {
   object-fit: cover;
   object-position: center top;
-}
-.movie-hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    100deg,
-    color-mix(in srgb, var(--page-bg) 94%, transparent),
-    color-mix(in srgb, var(--page-bg) 80%, transparent)
-  );
-  pointer-events: none;
+  opacity: 0.2;
+  mask-image: linear-gradient(100deg, rgb(0 0 0 / 30%), #000);
 }
 .movie-hero-content {
   position: relative;

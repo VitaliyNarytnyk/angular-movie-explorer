@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { DestroyRef, inject, Service, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -10,20 +9,16 @@ import {
   switchMap,
 } from 'rxjs';
 import { MAX_MOVIE_PAGES } from '@features/movies/constants/movie.constants';
-import { environment } from '@env/environment.local';
 import type { Movie } from '@features/movies/models/movie.model';
 import type { MovieDetails } from '@features/movies/models/movie-details.model';
 import type { MovieListResponse } from '@features/movies/models/movie-list-response.model';
 import type { MovieGenre } from '@features/movies/models/movie-genre.model';
-import type { MovieGenreListResponse } from '@features/movies/models/movie-genre-list-response.model';
 import type { MovieFilters } from '@features/movies/models/movie-filters.model';
+import { MovieApiService } from '@features/movies/services/movie-api.service';
 
 @Service()
 export class MovieService {
-  private readonly http = inject(HttpClient);
-  private readonly headers = {
-    Authorization: `Bearer ${environment.tmdbReadAccessToken}`,
-  };
+  private readonly api = inject(MovieApiService);
   private readonly movieQueries = new Subject<{
     query: string;
     page: number;
@@ -136,11 +131,8 @@ export class MovieService {
     this.genresLoadingState.set(true);
     this.genresErrorState.set(null);
 
-    this.http
-      .get<MovieGenreListResponse>(
-        `${environment.tmdbApiUrl}/genre/movie/list`,
-        { headers: this.headers },
-      )
+    this.api
+      .getGenres()
       .pipe(
         finalize(() => {
           this.genresLoadingState.set(false);
@@ -170,19 +162,15 @@ export class MovieService {
     this.similarLoadingState.set(true);
     this.similarErrorState.set(null);
 
-    return this.http
-      .get<MovieListResponse>(`${environment.tmdbApiUrl}/movie/${id}/similar`, {
-        headers: this.headers,
-      })
-      .pipe(
-        catchError(() => {
-          this.similarErrorState.set(
-            'Unable to load similar movies. Please try again.',
-          );
-          return EMPTY;
-        }),
-        finalize(() => this.similarLoadingState.set(false)),
-      );
+    return this.api.getSimilarMovies(id).pipe(
+      catchError(() => {
+        this.similarErrorState.set(
+          'Unable to load similar movies. Please try again.',
+        );
+        return EMPTY;
+      }),
+      finalize(() => this.similarLoadingState.set(false)),
+    );
   }
 
   private loadMovies(
@@ -193,79 +181,44 @@ export class MovieService {
     this.loadingState.set(true);
     this.errorState.set(null);
 
-    const endpoint = filters
-      ? '/discover/movie'
-      : query
-        ? '/search/movie'
-        : '/movie/popular';
-
-    const params: Record<string, string | number> = { page };
-
+    let request: Observable<MovieListResponse>;
     if (filters) {
-      params['sort_by'] = filters.sortBy;
-
-      if (filters.genreIds.length > 0) {
-        params['with_genres'] = filters.genreIds.join('|');
-      }
-
-      if (filters.yearFrom !== null) {
-        params['primary_release_date.gte'] = `${filters.yearFrom}-01-01`;
-      }
-
-      if (filters.yearTo !== null) {
-        params['primary_release_date.lte'] = `${filters.yearTo}-12-31`;
-      }
-
-      if (filters.minRating !== null) {
-        params['vote_average.gte'] = filters.minRating;
-      }
-
-      if (filters.minVotes !== null) {
-        params['vote_count.gte'] = filters.minVotes;
-      }
+      request = this.api.discoverMovies(filters, page);
     } else if (query) {
-      params['query'] = query;
+      request = this.api.searchMovies(query, page);
+    } else {
+      request = this.api.getPopularMovies(page);
     }
 
-    return this.http
-      .get<MovieListResponse>(`${environment.tmdbApiUrl}${endpoint}`, {
-        headers: this.headers,
-        params,
-      })
-      .pipe(
-        catchError(() => {
-          this.movieState.set([]);
-          this.errorState.set('Unable to load movies. Please try again.');
-          this.catalogInitializedState.set(true);
+    return request.pipe(
+      catchError(() => {
+        this.movieState.set([]);
+        this.errorState.set('Unable to load movies. Please try again.');
+        this.catalogInitializedState.set(true);
 
-          return EMPTY;
-        }),
-        finalize(() => {
-          this.loadingState.set(false);
-        }),
-      );
+        return EMPTY;
+      }),
+      finalize(() => {
+        this.loadingState.set(false);
+      }),
+    );
   }
 
   private loadMovieDetails(id: number): Observable<MovieDetails> {
     this.detailsLoadingState.set(true);
     this.detailsErrorState.set(null);
 
-    return this.http
-      .get<MovieDetails>(`${environment.tmdbApiUrl}/movie/${id}`, {
-        headers: this.headers,
-        params: { append_to_response: 'credits' },
-      })
-      .pipe(
-        catchError(() => {
-          this.detailsErrorState.set(
-            'Unable to load movie details. Please try again.',
-          );
+    return this.api.getMovieDetails(id).pipe(
+      catchError(() => {
+        this.detailsErrorState.set(
+          'Unable to load movie details. Please try again.',
+        );
 
-          return EMPTY;
-        }),
-        finalize(() => {
-          this.detailsLoadingState.set(false);
-        }),
-      );
+        return EMPTY;
+      }),
+      finalize(() => {
+        this.detailsLoadingState.set(false);
+      }),
+    );
   }
 }
