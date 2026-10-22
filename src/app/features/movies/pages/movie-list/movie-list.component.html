@@ -94,7 +94,13 @@
       } @else {
         <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           @for (movie of movieService.movies(); track movie.id) {
-            <li><app-movie-card [movie]="movie" [priority]="$index < 8" /></li>
+            <li>
+              <app-movie-card
+                [movie]="movie"
+                [priority]="$index < 8"
+                (movieSelected)="rememberSearch()"
+              />
+            </li>
           } @empty {
             @if (!movieService.loading()) {
               <li class="col-span-full py-12 text-center text-muted">

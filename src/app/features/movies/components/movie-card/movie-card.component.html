@@ -2,6 +2,7 @@
   [routerLink]="['/movies', movie().id]"
   queryParamsHandling="preserve"
   class="movie-card"
+  (click)="movieSelected.emit()"
 >
   @if (posterUrl(); as poster) {
     @if (priority()) {

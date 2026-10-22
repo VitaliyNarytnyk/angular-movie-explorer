@@ -1,16 +1,81 @@
 <form role="search" aria-label="Movie search" (submit)="onSubmit($event)">
-  <label for="movie-search" class="sr-only"> Search movies </label>
+  <label for="movie-search" class="sr-only">Search movies</label>
 
-  <div class="flex gap-3">
-    <input
-      id="movie-search"
-      type="search"
-      [formField]="searchForm.keyword"
-      (input)="onInput($event)"
-      placeholder="e.g. The Green Mile"
-      class="search-input min-w-0 flex-1"
-    />
-
+  <div class="relative flex gap-3">
+    <div class="min-w-0 flex-1 sm:relative">
+      <input
+        #searchInput
+        id="movie-search"
+        type="search"
+        autocomplete="off"
+        [formField]="searchForm.keyword"
+        (input)="onInput($event)"
+        (focus)="openHistory()"
+        (click)="openHistory()"
+        (keydown.arrowdown)="focusHistoryOption($event, 0)"
+        [attr.aria-controls]="
+          history.entries().length ? 'movie-search-history' : null
+        "
+        [attr.aria-describedby]="
+          history.entries().length ? 'movie-history-help' : null
+        "
+        placeholder="e.g. The Green Mile"
+        class="search-input w-full"
+      />
+      <span id="movie-history-help" class="sr-only">
+        Recent searches are available. Press Arrow Down to browse them.
+      </span>
+      <div
+        id="movie-search-history"
+        class="search-history"
+        [hidden]="!historyOpen()"
+      >
+        <div class="history-header">
+          <p id="movie-history-heading">Recent searches</p>
+          <button
+            type="button"
+            class="btn btn-compact"
+            (click)="clearHistory()"
+          >
+            Clear history
+          </button>
+        </div>
+        <ul aria-labelledby="movie-history-heading">
+          @for (
+            keyword of history.entries();
+            track keyword;
+            let index = $index
+          ) {
+            <li>
+              <button
+                #historyOption
+                type="button"
+                class="history-option"
+                (click)="selectHistory(keyword)"
+                (keydown.arrowdown)="focusHistoryOption($event, index + 1)"
+                (keydown.arrowup)="focusHistoryOption($event, index - 1)"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="M3 11a9 9 0 1 1 2.6 7M3 4v7h7m2-4v5l3 2" />
+                </svg>
+                <span>{{ keyword }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
     <button type="submit" class="btn btn-primary shrink-0">Search</button>
   </div>
 </form>

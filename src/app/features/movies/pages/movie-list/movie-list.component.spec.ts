@@ -5,6 +5,8 @@ import { vi } from 'vitest';
 import { By } from '@angular/platform-browser';
 import { MovieSearchComponent } from '@features/movies/components/movie-search/movie-search.component';
 import type { Movie } from '@features/movies/models/movie.model';
+import { MovieSearchHistoryService } from '@features/movies/services/movie-search-history.service';
+import { MovieCardComponent } from '@features/movies/components/movie-card/movie-card.component';
 import { MovieService } from '@features/movies/services/movie.service';
 import { MovieListComponent } from './movie-list.component';
 import { MovieFiltersComponent } from '@features/movies/components/movie-filters/movie-filters.component';
@@ -363,5 +365,28 @@ describe('MovieListComponent', () => {
       },
       3,
     );
+  });
+  it('remembers the applied title query when a result is opened', async () => {
+    const history = TestBed.inject(MovieSearchHistoryService);
+    const remember = vi
+      .spyOn(history, 'remember')
+      .mockImplementation(() => undefined);
+    const router = TestBed.inject(Router);
+    await router.navigate([], { queryParams: { query: 'The Green Mile' } });
+    movies.set([movie]);
+    await fixture.whenStable();
+    const card = fixture.debugElement.query(By.directive(MovieCardComponent))
+      .componentInstance as MovieCardComponent;
+    card.movieSelected.emit();
+    expect(remember).toHaveBeenCalledExactlyOnceWith('The Green Mile');
+
+    await router.navigate([], { queryParams: { mode: 'discover' } });
+    await fixture.whenStable();
+    remember.mockClear();
+    const discoveryCard = fixture.debugElement.query(
+      By.directive(MovieCardComponent),
+    ).componentInstance as MovieCardComponent;
+    discoveryCard.movieSelected.emit();
+    expect(remember).not.toHaveBeenCalled();
   });
 });

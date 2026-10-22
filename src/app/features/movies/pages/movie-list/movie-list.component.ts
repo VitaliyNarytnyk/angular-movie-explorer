@@ -14,6 +14,7 @@ import { MovieService } from '@features/movies/services/movie.service';
 import { distinctUntilChanged, map } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadingIndicatorComponent } from '@shared/components/loading-indicator/loading-indicator.component';
+import { MovieSearchHistoryService } from '@features/movies/services/movie-search-history.service';
 import { MovieCatalogStateService } from '@features/movies/services/movie-catalog-state.service';
 import { PaginationComponent } from '@shared/components/pagination/pagination.component';
 import { MovieFiltersComponent } from '@features/movies/components/movie-filters/movie-filters.component';
@@ -43,6 +44,7 @@ export class MovieListComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly catalogState = inject(MovieCatalogStateService);
+  private readonly searchHistory = inject(MovieSearchHistoryService);
   private readonly pageHeading =
     viewChild<ElementRef<HTMLHeadingElement>>('pageHeading');
 
@@ -85,6 +87,12 @@ export class MovieListComponent {
     if (current.mode !== 'search') return;
 
     this.navigateCatalog({ ...current, query: keyword.trim(), page: 1 }, true);
+  }
+
+  protected rememberSearch(): void {
+    if (this.catalogMode() === 'search') {
+      this.searchHistory.remember(this.searchQuery());
+    }
   }
 
   protected onModeChange(mode: MovieCatalogMode): void {

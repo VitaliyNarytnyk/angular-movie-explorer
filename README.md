@@ -6,6 +6,10 @@ discovering movies with filters, and viewing movie details.
 ## Features
 
 - Live title search with debounce and request cancellation.
+- Recent title searches in a dropdown on input focus, saved locally (up to eight,
+  without case-insensitive duplicates). Search/Enter and opening a search result
+  save the query; intermediate live typing is not recorded. History supports mouse,
+  touch, Tab, arrow keys, Escape, and clearing from within the dropdown.
 - Movie discovery by multiple genres (any selected genre), release year range, minimum
   rating, minimum vote count, and sorting by popularity, rating, or release date.
 - URL-based search, filters, and pagination, including browser history and links
